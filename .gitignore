@@ -400,5 +400,6 @@ FodyWeavers.xsd
 # random
 *.exe
 *.out
+*.o
 a.out
 main.o
