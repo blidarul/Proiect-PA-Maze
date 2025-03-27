@@ -401,3 +401,4 @@ FodyWeavers.xsd
 *.exe
 *.out
 a.out
+main.o
