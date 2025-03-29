@@ -22,15 +22,12 @@
 
 #include "raylib.h"
 
-#if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
 #endif
 
 //----------------------------------------------------------------------------------
 // Local Variables Definition (local to this module)
 //----------------------------------------------------------------------------------
-Camera camera = { 0 };
-Vector3 cubePosition = { 0 };
 
 //----------------------------------------------------------------------------------
 // Local Functions Declaration
