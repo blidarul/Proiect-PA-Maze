@@ -18,6 +18,7 @@
 *   Copyright (c) 2013-2024 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
+//Comentariu super jmecher
 
 #include "raylib.h"
 
