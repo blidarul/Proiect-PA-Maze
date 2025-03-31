@@ -403,3 +403,4 @@ FodyWeavers.xsd
 *.o
 a.out
 main.o
+.vscode/settings.json
