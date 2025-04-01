@@ -10,14 +10,13 @@
 //----------------------------------------------------------------------------------
 static void UpdateDrawFrame(Cell **path, int height, int width);
 static void DrawMaze(Cell **path, int height, int width);
-void InitializeMaze(Cell **path, int mazeHeight, int mazeWidth);
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 800
 #define SCALE 20
 #define WALL_THICKNESS (SCALE / 10)
 #define wallColor BLACK
-#define pathColor LIME
+#define pathColor RAYWHITE
 
 int main()
 {
@@ -62,27 +61,6 @@ int main()
     }
     free(path);
     return 0;
-}
-
-void InitializeMaze(Cell **path, int mazeHeight, int mazeWidth) {
-    for (int i = 0; i < mazeHeight; i++) {
-        for (int j = 0; j < mazeWidth; j++) {
-            path[i][j].visited = false;
-            path[i][j].onPath = false;
-
-            if (j == 0) {
-                setDir(&path[i][j], OUTGOING_PATH, NO_PATH, NO_PATH, NO_PATH);
-            } else if (j < mazeWidth - 1) {
-                setDir(&path[i][j], OUTGOING_PATH, NO_PATH, INCOMING_PATH, NO_PATH);
-            } else if (i == 0) {
-                setDir(&path[i][j], NO_PATH, NO_PATH, INCOMING_PATH, OUTGOING_PATH);
-            } else if (i < mazeHeight - 1) {
-                setDir(&path[i][j], NO_PATH, INCOMING_PATH, INCOMING_PATH, OUTGOING_PATH);
-            } else {
-                setDir(&path[i][j], NO_PATH, INCOMING_PATH, INCOMING_PATH, NO_PATH);
-            }
-        }
-    }
 }
 
 static void DrawMaze(Cell **path, int height, int width)

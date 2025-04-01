@@ -1,6 +1,8 @@
 #ifndef MAZE_H
 #define MAZE_H
 
+// Ensure the header guard is properly defined
+
 #include <stdbool.h>
 
 typedef enum {
@@ -25,5 +27,6 @@ void setCell(Cell* cell, unsigned char paths, bool visited, bool onPath);
 void getDir(Cell cell, unsigned int *east, unsigned int *north, unsigned int *west, unsigned int *south);
 int setDir(Cell* cell, unsigned int east, unsigned int north, unsigned int west, unsigned int south);
 Root RandomizeMaze(Cell** path, int height, int width, int root_x, int root_y, long long count);
+void InitializeMaze(Cell **path, int mazeHeight, int mazeWidth);
 
 #endif

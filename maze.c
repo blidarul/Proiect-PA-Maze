@@ -19,7 +19,8 @@ typedef struct root
 } Root;
 
 // Update allocation to use Cell structure
-Cell** createMaze(int height, int width) {
+Cell** createMaze(int height, int width) 
+{
     Cell** maze = (Cell**)malloc(height * sizeof(Cell*));
     for (int i = 0; i < height; i++) {
         maze[i] = (Cell*)malloc(width * sizeof(Cell));
@@ -54,7 +55,7 @@ int setDir(Cell* cell, unsigned int east, unsigned int north, unsigned int west,
     return 0;
 }
 
-void RemoveOutgoingPath(Cell** path, int x, int y, int direction) {
+static void RemoveOutgoingPath(Cell** path, int x, int y, int direction) {
     unsigned int east, north, west, south;
     getDir(path[x][y], &east, &north, &west, &south);
 
@@ -79,6 +80,27 @@ void RemoveOutgoingPath(Cell** path, int x, int y, int direction) {
             getDir(path[x + 1][y], &east, &north, &west, &south);
             setDir(&path[x + 1][y], east, NO_PATH, west, south);
             break;
+    }
+}
+
+void InitializeMaze(Cell **path, int mazeHeight, int mazeWidth) {
+    for (int i = 0; i < mazeHeight; i++) {
+        for (int j = 0; j < mazeWidth; j++) {
+            path[i][j].visited = false;
+            path[i][j].onPath = false;
+
+            if (j == 0) {
+                setDir(&path[i][j], OUTGOING_PATH, NO_PATH, NO_PATH, NO_PATH);
+            } else if (j < mazeWidth - 1) {
+                setDir(&path[i][j], OUTGOING_PATH, NO_PATH, INCOMING_PATH, NO_PATH);
+            } else if (i == 0) {
+                setDir(&path[i][j], NO_PATH, NO_PATH, INCOMING_PATH, OUTGOING_PATH);
+            } else if (i < mazeHeight - 1) {
+                setDir(&path[i][j], NO_PATH, INCOMING_PATH, INCOMING_PATH, OUTGOING_PATH);
+            } else {
+                setDir(&path[i][j], NO_PATH, INCOMING_PATH, INCOMING_PATH, NO_PATH);
+            }
+        }
     }
 }
 
