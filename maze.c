@@ -1,3 +1,6 @@
+#include <time.h>
+#include <stdlib.h>
+
 void getDir(unsigned char directions, unsigned int *east,unsigned int *north,unsigned int *west,unsigned int *south)
 {
     // EE NN WW SS >> 6 = 00 00 00 EE(shifts the whole number 6 bits to the right)
@@ -25,4 +28,22 @@ int setDir(unsigned char *directions,unsigned int east,unsigned int north,unsign
         *directions = (east << 6) | (north << 4) | (west << 2) | south;
     }
     return 0;
+}
+
+void RandomizeMaze(unsigned char **path,int height,int width,int root_x,int root_y,clock_t run_time)
+{
+    clock_t time = clock();
+    while(1)
+    {
+        clock_t aux = clock();
+        if(aux - time > run_time)
+            break;
+        unsigned int east,north,west,south;
+        getDir(path[root_x][root_y],&east,&north,&west,&south);
+        if(root_x == height - 1)
+            
+
+    }
+
+    return;
 }

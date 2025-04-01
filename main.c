@@ -26,7 +26,7 @@ int main()
     unsigned char **path = (unsigned char **)malloc(mazeHeight * sizeof(unsigned char *));
     for (int i = 0; i < mazeHeight; i++)
         path[i] = (unsigned char *)malloc(mazeWidth * sizeof(unsigned char));
-
+    //path[mazeHeight][mazeWidth]
     // Basic Maze generation
     for (int i = 0; i < mazeHeight; i++)
         for (int j = 0; j < mazeWidth; j++)
@@ -81,13 +81,13 @@ static void DrawMaze(unsigned char **path,int height,int width)
         int y = i * SCALE;
         int wallThickness = SCALE / 10;
         if (north == 0) // Draw top wall
-            DrawRectangle(x, y, SCALE, wallThickness, BLACK);
+            DrawRectangle(x, y, SCALE, wallThickness, BLUE);
         if (west == 0) // Draw left wall
-            DrawRectangle(x, y, wallThickness, SCALE, BLACK);
+            DrawRectangle(x, y, wallThickness, SCALE, BLUE);
         if (south == 0) // Draw bottom wall
-            DrawRectangle(x, y + SCALE - wallThickness, SCALE, wallThickness, BLACK);
+            DrawRectangle(x, y + SCALE - wallThickness, SCALE, wallThickness, BLUE);
         if (east == 0) // Draw right wall
-            DrawRectangle(x + SCALE - wallThickness, y, wallThickness, SCALE, BLACK);
+            DrawRectangle(x + SCALE - wallThickness, y, wallThickness, SCALE, BLUE);
     }
 }
 
