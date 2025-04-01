@@ -1,108 +1,112 @@
-/*******************************************************************************************
-*
-*   raylib [core] example - Basic 3d example
-*
-*   Welcome to raylib!
-*
-*   To compile example, just press F5.
-*   Note that compiled executable is placed in the same folder as .c file
-*
-*   You can find all basic examples on C:\raylib\raylib\examples folder or
-*   raylib official webpage: www.raylib.com
-*
-*   Enjoy using raylib. :)
-*
-*   This example has been created using raylib 1.0 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
-*
-*   Copyright (c) 2013-2024 Ramon Santamaria (@raysan5)
-*
-********************************************************************************************/
-//Comentariu super jmecher
+#include <stdlib.h>
 
 #include "raylib.h"
-
-#if defined(PLATFORM_WEB)
-    #include <emscripten/emscripten.h>
-#endif
-
-//----------------------------------------------------------------------------------
-// Local Variables Definition (local to this module)
-//----------------------------------------------------------------------------------
-Camera camera = { 0 };
-Vector3 cubePosition = { 0 };
+#include "maze.h"
 
 //----------------------------------------------------------------------------------
 // Local Functions Declaration
 //----------------------------------------------------------------------------------
-static void UpdateDrawFrame(void);          // Update and draw one frame
+static void UpdateDrawFrame(unsigned char **path,int height,int width); // Update and draw one frame
+static void DrawMaze(unsigned char **path,int height,int width);
 
-//----------------------------------------------------------------------------------
-// Main entry point
-//----------------------------------------------------------------------------------
+const int SCALE = 80;
+
 int main()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
     const int screenWidth = 800;
-    const int screenHeight = 450;
+    const int screenHeight = 800;
 
-    InitWindow(screenWidth, screenHeight, "raylib");
+    InitWindow(screenWidth, screenHeight, "maze");
 
-    camera.position = (Vector3){ 10.0f, 10.0f, 8.0f };
-    camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
-    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
-    camera.fovy = 60.0f;
-    camera.projection = CAMERA_PERSPECTIVE;
+    const int mazeWidth = screenWidth / SCALE;
+    const int mazeHeight = screenHeight / SCALE;
 
-    //--------------------------------------------------------------------------------------
+    unsigned char **path = (unsigned char **)malloc(mazeHeight * sizeof(unsigned char *));
+    for (int i = 0; i < mazeHeight; i++)
+        path[i] = (unsigned char *)malloc(mazeWidth * sizeof(unsigned char));
 
-#if defined(PLATFORM_WEB)
-    emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
-#else
-    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
-    //--------------------------------------------------------------------------------------
+    // Basic Maze generation
+    for (int i = 0; i < mazeHeight; i++)
+        for (int j = 0; j < mazeWidth; j++)
+        {
+            // 00 no path
+            // 10 outgoing path
+            // 01 incoming path
+            if (j == 0)
+                setDir(&path[i][j], OUTGOING_PATH, NO_PATH, NO_PATH, NO_PATH);
+                // path[i][j] = 0b10000000; //128
+            else if (j < mazeWidth - 1)
+                setDir(&path[i][j], OUTGOING_PATH, NO_PATH, INCOMING_PATH, NO_PATH);
+                //path[i][j] = 0b10000100; // 132
+            else if (i == 0)
+                setDir(&path[i][j], NO_PATH, NO_PATH, INCOMING_PATH, OUTGOING_PATH);
+                //path[i][j] = 0b00000110; // 6
+            else if (i < mazeHeight - 1)
+                setDir(&path[i][j], NO_PATH,INCOMING_PATH, INCOMING_PATH, OUTGOING_PATH);
+                //path[i][j] = 0b00010110; // 22
+            else
+                setDir(&path[i][j], NO_PATH,INCOMING_PATH, INCOMING_PATH, NO_PATH);
+        }
+
+    SetTargetFPS(10); // Set our game to run at 60 frames-per-second
 
     // Main game loop
-    while (!WindowShouldClose())    // Detect window close button or ESC key
+    while (!WindowShouldClose()) // Detect window close button or ESC key
     {
-        UpdateDrawFrame();
+        UpdateDrawFrame(path,mazeHeight,mazeWidth);
     }
-#endif
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    CloseWindow();                  // Close window and OpenGL context
+    CloseWindow(); // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
+
+    for (int i = 0; i < mazeHeight; i++)
+        free(path[i]);
+    free(path);
     return 0;
 }
 
+static void DrawMaze(unsigned char **path,int height,int width)
+{
+    for(int i = 0; i < height; i++)
+    for(int j = 0; j < width; j++)
+    {
+        unsigned int east,north,west,south;
+        getDir(path[i][j],&east,&north,&west,&south);
+        int x = j * SCALE;
+        int y = i * SCALE;
+        int wallThickness = SCALE / 10;
+        if (north == 0) // Draw top wall
+            DrawRectangle(x, y, SCALE, wallThickness, BLACK);
+        if (west == 0) // Draw left wall
+            DrawRectangle(x, y, wallThickness, SCALE, BLACK);
+        if (south == 0) // Draw bottom wall
+            DrawRectangle(x, y + SCALE - wallThickness, SCALE, wallThickness, BLACK);
+        if (east == 0) // Draw right wall
+            DrawRectangle(x + SCALE - wallThickness, y, wallThickness, SCALE, BLACK);
+    }
+}
+
 // Update and draw game frame
-static void UpdateDrawFrame(void)
+static void UpdateDrawFrame(unsigned char **path,int height,int width)
 {
     // Update
     //----------------------------------------------------------------------------------
-    UpdateCamera(&camera, CAMERA_ORBITAL);
+
     //----------------------------------------------------------------------------------
 
     // Draw
     //----------------------------------------------------------------------------------
     BeginDrawing();
 
-        ClearBackground(RAYWHITE);
+    ClearBackground(RAYWHITE);
+    DrawMaze(path,height,width);
 
-        BeginMode3D(camera);
-
-            DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, RED);
-            DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
-            DrawGrid(10, 1.0f);
-
-        EndMode3D();
-
-        DrawText("This is a raylib example", 10, 40, 20, DARKGRAY);
-
-        DrawFPS(10, 10);
+    DrawFPS(10, 10);
 
     EndDrawing();
     //----------------------------------------------------------------------------------
