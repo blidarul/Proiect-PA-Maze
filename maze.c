@@ -29,7 +29,7 @@ int setDir(unsigned char *directions,unsigned int east,unsigned int north,unsign
     }
     return 0;
 }
-
+//Randomize maze
 void RandomizeMaze(unsigned char **path,int height,int width,int root_x,int root_y,clock_t run_time)
 {
     clock_t time = clock();
