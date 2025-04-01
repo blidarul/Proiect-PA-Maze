@@ -16,7 +16,7 @@ typedef struct {
 typedef struct root
 {
     int x, y;
-} ROOT;
+} Root;
 
 // Update allocation to use Cell structure
 Cell** createMaze(int height, int width) {
@@ -83,8 +83,8 @@ void RemoveOutgoingPath(Cell** path, int x, int y, int direction) {
 }
 
 //Randomize maze
-ROOT RandomizeMaze(Cell** path, int height, int width, int root_x, int root_y, long long count) {
-    ROOT aux;
+Root RandomizeMaze(Cell** path, int height, int width, int root_x, int root_y, long long count) {
+    Root aux;
     long long i = 0;
     while(i < count) {
         unsigned int east, north, west, south;

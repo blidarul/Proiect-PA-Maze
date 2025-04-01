@@ -41,7 +41,7 @@ int main()
     InitializeMaze(path, mazeHeight, mazeWidth);
 
     SetTargetFPS(10); // Set our game to run at 60 frames-per-second
-    ROOT root = {.x = mazeHeight - 1, .y = mazeWidth - 1};
+    Root root = {.x = mazeHeight - 1, .y = mazeWidth - 1};
     root = RandomizeMaze(path, mazeHeight, mazeWidth, root.x, root.y, mazeHeight * mazeWidth * 20);
 
     // Main game loop
