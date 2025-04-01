@@ -15,14 +15,14 @@ const int SCALE = 80;
 
 int main()
 {
-    srand(time(NULL));
+    srand((unsigned int)clock());
     // Initialization
     //--------------------------------------------------------------------------------------
     const int screenWidth = 800;
     const int screenHeight = 800;
 
     InitWindow(screenWidth, screenHeight, "maze");
-
+    //--------------------------------------------------------------------------------------
     const int mazeWidth = screenWidth / SCALE;
     const int mazeHeight = screenHeight / SCALE;
 
@@ -38,24 +38,34 @@ int main()
             // 10 outgoing path
             // 01 incoming path
             if (j == 0)
+            {
                 setDir(&path[i][j], OUTGOING_PATH, NO_PATH, NO_PATH, NO_PATH);
                 // path[i][j] = 0b10000000; //128
+            }
             else if (j < mazeWidth - 1)
+            {
                 setDir(&path[i][j], OUTGOING_PATH, NO_PATH, INCOMING_PATH, NO_PATH);
                 //path[i][j] = 0b10000100; // 132
+            }
             else if (i == 0)
+            {
                 setDir(&path[i][j], NO_PATH, NO_PATH, INCOMING_PATH, OUTGOING_PATH);
                 //path[i][j] = 0b00000110; // 6
+            }
             else if (i < mazeHeight - 1)
+            {
                 setDir(&path[i][j], NO_PATH,INCOMING_PATH, INCOMING_PATH, OUTGOING_PATH);
                 //path[i][j] = 0b00010110; // 22
+            }
             else
+            {
                 setDir(&path[i][j], NO_PATH,INCOMING_PATH, INCOMING_PATH, NO_PATH);
+            }
         }
 
     SetTargetFPS(10); // Set our game to run at 60 frames-per-second
-
-    RandomizeMaze(path,mazeHeight,mazeWidth,mazeHeight - 1,mazeWidth - 1,(clock_t)2000);
+    ROOT root = {.x = mazeHeight - 1,.y = mazeWidth - 1};
+    root = RandomizeMaze(path,mazeHeight,mazeWidth,root.x,root.y,mazeHeight*mazeWidth*1000000);
 
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
@@ -87,12 +97,16 @@ static void DrawMaze(unsigned char **path,int height,int width)
         int wallThickness = SCALE / 10;
         if (north == 0) // Draw top wall
             DrawRectangle(x, y, SCALE, wallThickness, BLUE);
+
         if (west == 0) // Draw left wall
             DrawRectangle(x, y, wallThickness, SCALE, BLUE);
-        if (south == 0) // Draw bottom wall
+
+        if (i == height - 1 && south == 0) // Draw bottom wall
             DrawRectangle(x, y + SCALE - wallThickness, SCALE, wallThickness, BLUE);
-        if (east == 0) // Draw right wall
+
+        if (j == width - 1 && east == 0) // Draw right wall
             DrawRectangle(x + SCALE - wallThickness, y, wallThickness, SCALE, BLUE);
+
     }
 }
 

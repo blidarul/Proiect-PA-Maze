@@ -1,5 +1,13 @@
-#include <time.h>
 #include <stdlib.h>
+
+#define NO_PATH  (unsigned int)0
+#define OUTGOING_PATH  (unsigned int)2
+#define INCOMING_PATH  (unsigned int)1
+    
+typedef struct root
+{
+    int x,y;
+}ROOT;
 
 void getDir(unsigned char directions, unsigned int *east,unsigned int *north,unsigned int *west,unsigned int *south)
 {
@@ -30,16 +38,15 @@ int setDir(unsigned char *directions,unsigned int east,unsigned int north,unsign
     return 0;
 }
 //Randomize maze
-void RandomizeMaze(unsigned char **path,int height,int width,int root_x,int root_y,clock_t run_time)
+ROOT RandomizeMaze(unsigned char **path,int height,int width,int root_x,int root_y,long long count)
 {
-    clock_t time = clock();
-    while(1)
+    ROOT aux;
+    long long i = 0;
+    while(i < count)
     {
-        clock_t aux = clock();
-        if(aux - time > run_time)
-            break;
         unsigned int east,north,west,south;
         getDir(path[root_x][root_y],&east,&north,&west,&south);
+        //stores the possible directions to go
         int choices[4] = {1,1,1,1};
         if(root_x == height - 1)
             choices[3] = 0;
@@ -49,45 +56,92 @@ void RandomizeMaze(unsigned char **path,int height,int width,int root_x,int root
             choices[2] = 0;
         if(root_y == width - 1)
             choices[0] = 0;
+        //picks a valid direction
         int random = rand() % 3;
         while(choices[random] == 0)
         {
-            random = rand() % 3;
+            random = rand() % 4;
         }
+
         switch (random)
         {
-        case 0:
-            setDir(&path[root_x][root_y],2,north,west,south);
+        case 0:         //picked east
+            //make an outgoing path east
+            setDir(&path[root_x][root_y],OUTGOING_PATH,north,west,south);
+            //change the new root to be east of the old one
             root_y ++;
+            //replace west path from the new root with an incoming path
+            getDir(path[root_x][root_y],&east,&north,&west,&south);
+            setDir(&path[root_x][root_y], east, north, INCOMING_PATH, south);
             break;
-        case 1:
-            setDir(&path[root_x][root_y],east,2,west,south);
+        case 1:         //picked north
+            setDir(&path[root_x][root_y],east,OUTGOING_PATH,west,south);
+            //change the new root to be north of the old one
             root_x --;
+            //replace south path from the new root with an incoming path
+            getDir(path[root_x][root_y],&east,&north,&west,&south);
+            setDir(&path[root_x][root_y], east, north, west, INCOMING_PATH);
             break;
-        case 2:
-            setDir(&path[root_x][root_y],east,north,2,south);
+        case 2:         //picked west
+            setDir(&path[root_x][root_y],east,north,OUTGOING_PATH,south);
+            //change the new root to be west of the old one
             root_y --;
+            //replace east path from the new root with an incoming path
+            getDir(path[root_x][root_y],&east,&north,&west,&south);
+            setDir(&path[root_x][root_y], INCOMING_PATH, north, west, south);
             break;
-        case 3:
-            setDir(&path[root_x][root_y],east,north,west,2);
+        case 3:         //picked south
+            setDir(&path[root_x][root_y],east,north,west,OUTGOING_PATH);
+            //change the new root to be south of the old one
             root_x ++;
+            //replace north path from the new root with an incoming path
+            getDir(path[root_x][root_y],&east,&north,&west,&south);
+            setDir(&path[root_x][root_y], east, INCOMING_PATH, west, south);
             break;
         default:
             break;
         }
+        
         getDir(path[root_x][root_y],&east,&north,&west,&south);
-        if(east == 2)
-            setDir(&path[root_x][root_y],0,north,west,south);
+        if(east == OUTGOING_PATH)
+        {
+            //changes the outgoing east path to no path
+            setDir(&path[root_x][root_y],NO_PATH,north,west,south);
+            //changes the east node's west path to no path
+            getDir(path[root_x][root_y + 1],&east,&north,&west,&south);
+            setDir(&path[root_x][root_y + 1],east,north,NO_PATH,south);
+        }
         else
-        if(north == 2)
-            setDir(&path[root_x][root_y],east,0,west,south);
+        if(north == OUTGOING_PATH)
+        {
+            //changes the outgoiong path north to no path
+            setDir(&path[root_x][root_y],east,NO_PATH,west,south);
+            //changes the north node's south path to none
+            getDir(path[root_x - 1][root_y],&east,&north,&west,&south);
+            setDir(&path[root_x - 1][root_y],east,north,west,NO_PATH);
+        }
         else
-        if(west == 2)
-            setDir(&path[root_x][root_y],east,north,0,south);
+        if(west == OUTGOING_PATH)
+        {
+            //changes the outgoiong path west to no path
+            setDir(&path[root_x][root_y],east,north,NO_PATH,south);
+            //changes the west node's east path to none
+            getDir(path[root_x][root_y - 1],&east,&north,&west,&south);
+            setDir(&path[root_x][root_y - 1],NO_PATH,north,west,south);
+        }
         else
-        if(south == 2)
-            setDir(&path[root_x][root_y],east,north,west,0);
+        if(south == OUTGOING_PATH)
+        {
+            //changes the outgoiong path south to no path
+            setDir(&path[root_x][root_y],east,north,west,NO_PATH);
+            //changes the south node's north path to none
+            getDir(path[root_x + 1][root_y],&east,&north,&west,&south);
+            setDir(&path[root_x + 1][root_y],east,NO_PATH,west,south);
+        }
+        i++;
     }
+    aux.x = root_x;
+    aux.y = root_y;
 
-    return;
+    return aux;
 }
