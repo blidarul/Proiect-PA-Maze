@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <time.h>
 
 #include "raylib.h"
 #include "maze.h"
@@ -11,8 +12,10 @@ static void DrawMaze(unsigned char **path,int height,int width);
 
 const int SCALE = 80;
 
+
 int main()
 {
+    srand(time(NULL));
     // Initialization
     //--------------------------------------------------------------------------------------
     const int screenWidth = 800;
@@ -51,6 +54,8 @@ int main()
         }
 
     SetTargetFPS(10); // Set our game to run at 60 frames-per-second
+
+    RandomizeMaze(path,mazeHeight,mazeWidth,mazeHeight - 1,mazeWidth - 1,(clock_t)2000);
 
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
@@ -96,7 +101,6 @@ static void UpdateDrawFrame(unsigned char **path,int height,int width)
 {
     // Update
     //----------------------------------------------------------------------------------
-
     //----------------------------------------------------------------------------------
 
     // Draw

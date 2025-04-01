@@ -40,9 +40,53 @@ void RandomizeMaze(unsigned char **path,int height,int width,int root_x,int root
             break;
         unsigned int east,north,west,south;
         getDir(path[root_x][root_y],&east,&north,&west,&south);
+        int choices[4] = {1,1,1,1};
         if(root_x == height - 1)
-            
-
+            choices[3] = 0;
+        if(root_x == 0)
+            choices[1] = 0;
+        if(root_y == 0)
+            choices[2] = 0;
+        if(root_y == width - 1)
+            choices[0] = 0;
+        int random = rand() % 3;
+        while(choices[random] == 0)
+        {
+            random = rand() % 3;
+        }
+        switch (random)
+        {
+        case 0:
+            setDir(&path[root_x][root_y],2,north,west,south);
+            root_y ++;
+            break;
+        case 1:
+            setDir(&path[root_x][root_y],east,2,west,south);
+            root_x --;
+            break;
+        case 2:
+            setDir(&path[root_x][root_y],east,north,2,south);
+            root_y --;
+            break;
+        case 3:
+            setDir(&path[root_x][root_y],east,north,west,2);
+            root_x ++;
+            break;
+        default:
+            break;
+        }
+        getDir(path[root_x][root_y],&east,&north,&west,&south);
+        if(east == 2)
+            setDir(&path[root_x][root_y],0,north,west,south);
+        else
+        if(north == 2)
+            setDir(&path[root_x][root_y],east,0,west,south);
+        else
+        if(west == 2)
+            setDir(&path[root_x][root_y],east,north,0,south);
+        else
+        if(south == 2)
+            setDir(&path[root_x][root_y],east,north,west,0);
     }
 
     return;

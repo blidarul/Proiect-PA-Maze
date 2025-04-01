@@ -1,6 +1,6 @@
 #ifndef MAZE_H      // Check if not defined
 #define MAZE_H      // Define it
-
+#include <time.h>
 //#include <raylib.h>
 
 //Using bit manipulation to save memory
@@ -17,7 +17,7 @@ const unsigned int INCOMING_PATH = 1;
 
 int getDir(unsigned char directions, unsigned int *east,unsigned int *north,unsigned int *west,unsigned int *south);
 int setDir(unsigned char *directions,unsigned int east,unsigned int north,unsigned int west,unsigned int south);
-
+void RandomizeMaze(unsigned char **path,int height,int width,int root_x,int root_y,clock_t run_time);
 
 
 #endif              //End
