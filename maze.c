@@ -1,9 +1,11 @@
 #include <stdlib.h>
 
-#define NO_PATH  (unsigned int)0
-#define OUTGOING_PATH  (unsigned int)2
-#define INCOMING_PATH  (unsigned int)1
-    
+typedef enum {
+    NO_PATH = 0,
+    INCOMING_PATH = 1,
+    OUTGOING_PATH = 2
+} PathType;
+
 typedef struct root
 {
     int x,y;
@@ -37,6 +39,35 @@ int setDir(unsigned char *directions,unsigned int east,unsigned int north,unsign
     }
     return 0;
 }
+
+void RemoveOutgoingPath(unsigned char **path, int x, int y, int direction) {
+    unsigned int east, north, west, south;
+    getDir(path[x][y], &east, &north, &west, &south);
+
+    switch (direction) {
+        case 0: // East
+            setDir(&path[x][y], NO_PATH, north, west, south);
+            getDir(path[x][y + 1], &east, &north, &west, &south);
+            setDir(&path[x][y + 1], east, north, NO_PATH, south);
+            break;
+        case 1: // North
+            setDir(&path[x][y], east, NO_PATH, west, south);
+            getDir(path[x - 1][y], &east, &north, &west, &south);
+            setDir(&path[x - 1][y], east, north, west, NO_PATH);
+            break;
+        case 2: // West
+            setDir(&path[x][y], east, north, NO_PATH, south);
+            getDir(path[x][y - 1], &east, &north, &west, &south);
+            setDir(&path[x][y - 1], NO_PATH, north, west, south);
+            break;
+        case 3: // South
+            setDir(&path[x][y], east, north, west, NO_PATH);
+            getDir(path[x + 1][y], &east, &north, &west, &south);
+            setDir(&path[x + 1][y], east, NO_PATH, west, south);
+            break;
+    }
+}
+
 //Randomize maze
 ROOT RandomizeMaze(unsigned char **path,int height,int width,int root_x,int root_y,long long count)
 {
@@ -57,7 +88,7 @@ ROOT RandomizeMaze(unsigned char **path,int height,int width,int root_x,int root
         if(root_y == width - 1)
             choices[0] = 0;
         //picks a valid direction
-        int random = rand() % 3;
+        int random = rand() % 4;
         while(choices[random] == 0)
         {
             random = rand() % 4;
@@ -105,38 +136,22 @@ ROOT RandomizeMaze(unsigned char **path,int height,int width,int root_x,int root
         getDir(path[root_x][root_y],&east,&north,&west,&south);
         if(east == OUTGOING_PATH)
         {
-            //changes the outgoing east path to no path
-            setDir(&path[root_x][root_y],NO_PATH,north,west,south);
-            //changes the east node's west path to no path
-            getDir(path[root_x][root_y + 1],&east,&north,&west,&south);
-            setDir(&path[root_x][root_y + 1],east,north,NO_PATH,south);
+            RemoveOutgoingPath(path, root_x, root_y, 0);
         }
         else
         if(north == OUTGOING_PATH)
         {
-            //changes the outgoiong path north to no path
-            setDir(&path[root_x][root_y],east,NO_PATH,west,south);
-            //changes the north node's south path to none
-            getDir(path[root_x - 1][root_y],&east,&north,&west,&south);
-            setDir(&path[root_x - 1][root_y],east,north,west,NO_PATH);
+            RemoveOutgoingPath(path, root_x, root_y, 1);
         }
         else
         if(west == OUTGOING_PATH)
         {
-            //changes the outgoiong path west to no path
-            setDir(&path[root_x][root_y],east,north,NO_PATH,south);
-            //changes the west node's east path to none
-            getDir(path[root_x][root_y - 1],&east,&north,&west,&south);
-            setDir(&path[root_x][root_y - 1],NO_PATH,north,west,south);
+            RemoveOutgoingPath(path, root_x, root_y, 2);
         }
         else
         if(south == OUTGOING_PATH)
         {
-            //changes the outgoiong path south to no path
-            setDir(&path[root_x][root_y],east,north,west,NO_PATH);
-            //changes the south node's north path to none
-            getDir(path[root_x + 1][root_y],&east,&north,&west,&south);
-            setDir(&path[root_x + 1][root_y],east,NO_PATH,west,south);
+            RemoveOutgoingPath(path, root_x, root_y, 3);
         }
         i++;
     }
