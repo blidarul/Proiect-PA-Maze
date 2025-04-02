@@ -52,7 +52,7 @@ int main()
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
         UpdateDrawFrame(path, mazeHeight, mazeWidth);
-        DrawRectangle(root.x, root.y, 9 * SCALE / 50,9 * SCALE / 50, RED);
+        DrawRectangle(root.x,root.y,SCALE + WALL_THICKNESS,SCALE + WALL_THICKNESS, RED);
         // Color *colors = LoadImageColors(screenImage);
         Image screenImage = LoadImageFromScreen();
         if (IsKeyDown(KEY_D)) {
