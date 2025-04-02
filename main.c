@@ -5,6 +5,8 @@
 #include "raylib.h"
 #include "maze.h"
 
+
+
 //----------------------------------------------------------------------------------
 // Local Functions Declaration
 //----------------------------------------------------------------------------------
@@ -17,6 +19,7 @@ static void DrawMaze(Cell **path, int height, int width);
 #define WALL_THICKNESS (SCALE / 10)
 #define wallColor BLACK
 #define pathColor RAYWHITE
+#define playerRadius 9
 
 int main()
 {
@@ -39,18 +42,34 @@ int main()
 
     InitializeMaze(path, mazeHeight, mazeWidth);
 
-    SetTargetFPS(10); // Set our game to run at 60 frames-per-second
+    SetTargetFPS(60); // Set our game to run at 60 frames-per-second
     Root root = {.x = mazeHeight - 1, .y = mazeWidth - 1};
     root = RandomizeMaze(path, mazeHeight, mazeWidth, root.x, root.y, mazeHeight * mazeWidth * 20);
 
     // Main game loop
+    
+    PLAYER player = {10, 10};
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
         UpdateDrawFrame(path, mazeHeight, mazeWidth);
+        DrawRectangle(root.x, root.y, 9,9, RED);
+        // Color *colors = LoadImageColors(screenImage);
+        Image screenImage = LoadImageFromScreen();
+        if (IsKeyDown(KEY_D)) {
+            // if(ColorIsEqual(GetImageColor(screenImage,player.x + 9/2 + 1, player.y), wallColor))
+            player.x += 1;
+        }
+        if (IsKeyDown(KEY_A)) player.x -= 1;
+        if (IsKeyDown(KEY_W)) player.y -= 1;
+        if (IsKeyDown(KEY_S)) player.y += 1;
+        BeginDrawing();
+            DrawRectangle(player.x, player.y, playerRadius, playerRadius, DARKGREEN);
+        //EndDrawing();
     }
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
+    EndDrawing();
     CloseWindow(); // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
