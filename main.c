@@ -15,7 +15,7 @@ static void DrawMaze(Cell **path, int height, int width);
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 800
-#define SCALE 20
+#define SCALE 100
 #define WALL_THICKNESS (SCALE / 10)
 #define wallColor BLACK
 #define pathColor RAYWHITE
@@ -52,18 +52,18 @@ int main()
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
         UpdateDrawFrame(path, mazeHeight, mazeWidth);
-        DrawRectangle(root.x, root.y, 9,9, RED);
+        DrawRectangle(root.x, root.y, 9 * SCALE / 50,9 * SCALE / 50, RED);
         // Color *colors = LoadImageColors(screenImage);
         Image screenImage = LoadImageFromScreen();
         if (IsKeyDown(KEY_D)) {
             // if(ColorIsEqual(GetImageColor(screenImage,player.x + 9/2 + 1, player.y), wallColor))
-            player.x += 1;
+            player.x += 1 * SCALE / 20;
         }
-        if (IsKeyDown(KEY_A)) player.x -= 1;
-        if (IsKeyDown(KEY_W)) player.y -= 1;
-        if (IsKeyDown(KEY_S)) player.y += 1;
+        if (IsKeyDown(KEY_A)) player.x -= 1 * SCALE / 20;
+        if (IsKeyDown(KEY_W)) player.y -= 1 * SCALE / 20;
+        if (IsKeyDown(KEY_S)) player.y += 1 * SCALE / 20;
         BeginDrawing();
-            DrawRectangle(player.x, player.y, playerRadius, playerRadius, DARKGREEN);
+            DrawRectangle(player.x, player.y, playerRadius * SCALE / 20, playerRadius * SCALE / 20, DARKGREEN);
         //EndDrawing();
     }
 
