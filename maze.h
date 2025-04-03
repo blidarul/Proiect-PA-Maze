@@ -32,7 +32,7 @@ Cell** createMaze(int height, int width);
 void setCell(Cell* cell, unsigned char paths, bool visited, bool onPath);
 void getDir(Cell cell, unsigned int *east, unsigned int *north, unsigned int *west, unsigned int *south);
 int setDir(Cell* cell, unsigned int east, unsigned int north, unsigned int west, unsigned int south);
-Root RandomizeMaze(Cell** path, int height, int width, int root_x, int root_y, long long count);
+void RandomizeMaze(Cell** path, int height, int width, Root *root, long long count);
 void InitializeMaze(Cell **path, int mazeHeight, int mazeWidth);
 
 #endif

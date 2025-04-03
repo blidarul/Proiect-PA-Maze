@@ -4,25 +4,27 @@
 
 #include "raylib.h"
 #include "maze.h"
+#include "player.h"
 
-
-
-//----------------------------------------------------------------------------------
-// Local Functions Declaration
-//----------------------------------------------------------------------------------
-static void UpdateDrawFrame(Cell **path, int height, int width);
-static void DrawMaze(Cell **path, int height, int width);
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 800
 #define SCALE 100
 #define WALL_THICKNESS (SCALE / 10)
-#define wallColor BLACK
-#define pathColor RAYWHITE
-#define playerRadius 9
+#define WALL_COLOR BLACK
+#define PATH_COLOR RAYWHITE
+#define PLAYER_RADIUS SCALE / 2
+
+//----------------------------------------------------------------------------------
+// Local Functions Declaration
+//----------------------------------------------------------------------------------
+static void UpdateDrawFrame(Cell **path, int height, int width, Root root, PLAYER *player);
+static void DrawWalls(Cell **path, int height, int width);
+
 
 int main()
 {
+    //random seed based on run-time
     srand((unsigned int)clock());
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -44,27 +46,14 @@ int main()
 
     SetTargetFPS(60); // Set our game to run at 60 frames-per-second
     Root root = {.x = mazeHeight - 1, .y = mazeWidth - 1};
-    root = RandomizeMaze(path, mazeHeight, mazeWidth, root.x, root.y, mazeHeight * mazeWidth * 20);
+    RandomizeMaze(path, mazeHeight, mazeWidth, &root, mazeHeight * mazeWidth * 20);
 
     // Main game loop
     
-    PLAYER player = {10, 10};
+    PLAYER player = {.x = 10, .y = 10};
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
-        UpdateDrawFrame(path, mazeHeight, mazeWidth);
-        DrawRectangle(root.x,root.y,SCALE + WALL_THICKNESS,SCALE + WALL_THICKNESS, RED);
-        // Color *colors = LoadImageColors(screenImage);
-        Image screenImage = LoadImageFromScreen();
-        if (IsKeyDown(KEY_D)) {
-            // if(ColorIsEqual(GetImageColor(screenImage,player.x + 9/2 + 1, player.y), wallColor))
-            player.x += 1 * SCALE / 20;
-        }
-        if (IsKeyDown(KEY_A)) player.x -= 1 * SCALE / 20;
-        if (IsKeyDown(KEY_W)) player.y -= 1 * SCALE / 20;
-        if (IsKeyDown(KEY_S)) player.y += 1 * SCALE / 20;
-        BeginDrawing();
-            DrawRectangle(player.x, player.y, playerRadius * SCALE / 20, playerRadius * SCALE / 20, DARKGREEN);
-        //EndDrawing();
+        UpdateDrawFrame(path, mazeHeight, mazeWidth, root, &player);
     }
 
     // De-Initialization
@@ -82,7 +71,7 @@ int main()
     return 0;
 }
 
-static void DrawMaze(Cell **path, int height, int width)
+static void DrawWalls(Cell **path, int height, int width)
 {
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
@@ -93,42 +82,49 @@ static void DrawMaze(Cell **path, int height, int width)
 
             // Draw top wall
             if (north == 0)
-                DrawRectangle(x, y, SCALE, WALL_THICKNESS, wallColor);
+                DrawRectangle(x, y, SCALE, WALL_THICKNESS, WALL_COLOR);
 
             // Draw left wall
             if (west == 0)
-                DrawRectangle(x, y, WALL_THICKNESS, SCALE, wallColor);
+                DrawRectangle(x, y, WALL_THICKNESS, SCALE, WALL_COLOR);
 
             // Draw bottom wall (only for the last row)
             if (i == height - 1 && south == 0)
-                DrawRectangle(x, y + SCALE - WALL_THICKNESS, SCALE, WALL_THICKNESS, wallColor);
+                DrawRectangle(x, y + SCALE - WALL_THICKNESS, SCALE, WALL_THICKNESS, WALL_COLOR);
 
             // Draw right wall (only for the last column)
             if (j == width - 1 && east == 0)
-                DrawRectangle(x + SCALE - WALL_THICKNESS, y, WALL_THICKNESS, SCALE, wallColor);
+                DrawRectangle(x + SCALE - WALL_THICKNESS, y, WALL_THICKNESS, SCALE, WALL_COLOR);
 
             // Draw corners to avoid gaps
             if (north == 0 && west == 0)
-                DrawRectangle(x, y, WALL_THICKNESS, WALL_THICKNESS, wallColor); // Top-left corner
+                DrawRectangle(x, y, WALL_THICKNESS, WALL_THICKNESS, WALL_COLOR); // Top-left corner
 
             if (north == 0 && east == 0)
-                DrawRectangle(x + SCALE, y, WALL_THICKNESS, WALL_THICKNESS, wallColor); // Top-right corner
+                DrawRectangle(x + SCALE, y, WALL_THICKNESS, WALL_THICKNESS, WALL_COLOR); // Top-right corner
 
             if (south == 0 && west == 0)
-                DrawRectangle(x, y + SCALE, WALL_THICKNESS, WALL_THICKNESS, wallColor); // Bottom-left corner
+                DrawRectangle(x, y + SCALE, WALL_THICKNESS, WALL_THICKNESS, WALL_COLOR); // Bottom-left corner
 
             if (south == 0 && east == 0)
-                DrawRectangle(x + SCALE, y + SCALE, WALL_THICKNESS, WALL_THICKNESS, wallColor); // Bottom-right corner
+                DrawRectangle(x + SCALE, y + SCALE, WALL_THICKNESS, WALL_THICKNESS, WALL_COLOR); // Bottom-right corner
         }
     }
 }
 
 // Update and draw game frame
-static void UpdateDrawFrame(Cell **path, int height, int width)
+static void UpdateDrawFrame(Cell **path, int height, int width, Root root, PLAYER *player)
 {
+    // Update
+    UpdatePlayer(player, SCALE, WALL_THICKNESS, SCREEN_WIDTH, SCREEN_HEIGHT, PLAYER_RADIUS);
+
+    // Draw
     BeginDrawing();
-    ClearBackground(pathColor);
-    DrawMaze(path, height, width);
+    ClearBackground(PATH_COLOR);
+    DrawRectangle(root.x * SCALE, root.y * SCALE, 
+                 SCALE, SCALE, RED);
+    DrawWalls(path, height, width);
+    DrawPlayer(player, PLAYER_RADIUS, DARKGREEN);
     DrawFPS(10, 10);
     EndDrawing();
 }
