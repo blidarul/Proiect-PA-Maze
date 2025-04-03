@@ -44,7 +44,7 @@ int main()
 
     InitializeMaze(path, mazeHeight, mazeWidth);
 
-    SetTargetFPS(60); // Set our game to run at 60 frames-per-second
+    SetTargetFPS(144); // Set our game to run at 60 frames-per-second
     Root root = {.x = mazeHeight - 1, .y = mazeWidth - 1};
     RandomizeMaze(path, mazeHeight, mazeWidth, &root, mazeHeight * mazeWidth * 20);
 
@@ -58,7 +58,7 @@ int main()
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    EndDrawing();
+    //EndDrawing();
     CloseWindow(); // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
@@ -117,13 +117,26 @@ static void UpdateDrawFrame(Cell **path, int height, int width, Root root, PLAYE
 {
     // Update
     UpdatePlayer(player, SCALE, WALL_THICKNESS, SCREEN_WIDTH, SCREEN_HEIGHT, PLAYER_RADIUS);
+    bool win = false;
+    if( (player->x + PLAYER_RADIUS > root.x * SCALE && player->x < (root.x + 1)*SCALE) &&(player->y + PLAYER_RADIUS> root.y * SCALE)&& player->y < (root.y + 1) *SCALE)
+    {
+        win = true;
+    }
 
     // Draw
     BeginDrawing();
     ClearBackground(PATH_COLOR);
-    DrawRectangle(root.x * SCALE, root.y * SCALE, 
-                 SCALE, SCALE, RED);
+    DrawRectangle(root.x * SCALE, root.y * SCALE, SCALE, SCALE, RED);
+    //DrawRectangle(root.x * SCALE, root.y * SCALE, SCALE, SCALE, BLUE);
     DrawWalls(path, height, width);
+    if(win)
+    {
+        DrawText("You Win!", SCREEN_WIDTH / 2 - MeasureText("You Win!", 30) / 2, SCREEN_HEIGHT / 2 - 10, 30, GREEN);
+    }
+    else
+    {
+        DrawText("Keep Searching!", SCREEN_WIDTH / 2 - MeasureText("Keep Searching!", 30) / 2, SCREEN_HEIGHT / 2 - 10, 30, DARKGRAY);
+    }
     DrawPlayer(player, PLAYER_RADIUS, DARKGREEN);
     DrawFPS(10, 10);
     EndDrawing();

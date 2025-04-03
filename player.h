@@ -4,8 +4,8 @@
 #include "raylib.h"
 #include "maze.h"
 
-// Player movement speed constant
-#define PLAYER_SPEED(scale) (scale / 20)
+// Player movement speed constant (pixels per second)
+#define PLAYER_SPEED(scale) (scale * 5.0f)
 
 // Check and handle player collisions with walls
 void HandlePlayerBorderCollisions(PLAYER *player, int wallThickness, int screenWidth, int screenHeight, int playerRadius);

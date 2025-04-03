@@ -12,17 +12,21 @@ void HandlePlayerBorderCollisions(PLAYER *player, int wallThickness, int screenW
 }
 
 void UpdatePlayer(PLAYER *player, int scale, int wallThickness, int screenWidth, int screenHeight, int playerRadius) {
+    // Get delta time in seconds
+    float deltaTime = GetFrameTime();
+    float moveSpeed = PLAYER_SPEED(scale) * deltaTime;
+
     if (IsKeyDown(KEY_D)) {
-        player->x += PLAYER_SPEED(scale);
+        player->x += moveSpeed;
     }
     if (IsKeyDown(KEY_A)) {
-        player->x -= PLAYER_SPEED(scale);
+        player->x -= moveSpeed;
     }
     if (IsKeyDown(KEY_W)) {
-        player->y -= PLAYER_SPEED(scale);
+        player->y -= moveSpeed;
     }
     if (IsKeyDown(KEY_S)) {
-        player->y += PLAYER_SPEED(scale);
+        player->y += moveSpeed;
     }
     
     HandlePlayerBorderCollisions(player, wallThickness, screenWidth, screenHeight, playerRadius);
