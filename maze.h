@@ -5,12 +5,6 @@
 
 #include <stdbool.h>
 
-typedef struct {
-    int x;
-    int y;
-    int facing;
-} PLAYER;
-
 typedef enum {
     NO_PATH = 0,
     INCOMING_PATH = 1,

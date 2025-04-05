@@ -11,7 +11,7 @@
 #define SCREEN_HEIGHT 800
 #define SCALE 100
 #define WALL_THICKNESS (SCALE / 10)
-#define WALL_COLOR BLACK
+#define WALL_COLOR DARKGRAY
 #define PATH_COLOR RAYWHITE
 #define PLAYER_RADIUS SCALE / 2
 
@@ -44,7 +44,7 @@ int main()
 
     InitializeMaze(path, mazeHeight, mazeWidth);
 
-    SetTargetFPS(144); // Set our game to run at 60 frames-per-second
+    SetTargetFPS(120); // Set our game to run at 60 frames-per-second
     Root root = {.x = mazeHeight - 1, .y = mazeWidth - 1};
     RandomizeMaze(path, mazeHeight, mazeWidth, &root, mazeHeight * mazeWidth * 20);
 
@@ -116,7 +116,7 @@ static void DrawWalls(Cell **path, int height, int width)
 static void UpdateDrawFrame(Cell **path, int height, int width, Root root, PLAYER *player)
 {
     // Update
-    UpdatePlayer(player, SCALE, WALL_THICKNESS, SCREEN_WIDTH, SCREEN_HEIGHT, PLAYER_RADIUS);
+    UpdatePlayer(player, SCALE, WALL_THICKNESS, SCREEN_WIDTH, SCREEN_HEIGHT, PLAYER_RADIUS,path[player->y / SCALE][player->x /SCALE]);
     bool win = false;
     if( (player->x + PLAYER_RADIUS > root.x * SCALE && player->x < (root.x + 1)*SCALE) &&(player->y + PLAYER_RADIUS> root.y * SCALE)&& player->y < (root.y + 1) *SCALE)
     {
@@ -129,15 +129,15 @@ static void UpdateDrawFrame(Cell **path, int height, int width, Root root, PLAYE
     DrawRectangle(root.x * SCALE, root.y * SCALE, SCALE, SCALE, RED);
     //DrawRectangle(root.x * SCALE, root.y * SCALE, SCALE, SCALE, BLUE);
     DrawWalls(path, height, width);
+    DrawPlayer(player, PLAYER_RADIUS, DARKGREEN);
     if(win)
     {
         DrawText("You Win!", SCREEN_WIDTH / 2 - MeasureText("You Win!", 30) / 2, SCREEN_HEIGHT / 2 - 10, 30, GREEN);
     }
     else
     {
-        DrawText("Keep Searching!", SCREEN_WIDTH / 2 - MeasureText("Keep Searching!", 30) / 2, SCREEN_HEIGHT / 2 - 10, 30, DARKGRAY);
+        DrawText("Keep Searching!", SCREEN_WIDTH / 2 - MeasureText("Keep Searching!", 30) / 2, SCREEN_HEIGHT / 2 - 10, 30, BLUE);
     }
-    DrawPlayer(player, PLAYER_RADIUS, DARKGREEN);
     DrawFPS(10, 10);
     EndDrawing();
 }
