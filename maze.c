@@ -193,8 +193,22 @@ void RandomizeMaze(Cell **path, int height, int width, Root *root, long long cou
     }
 }
 
-//Time function
-void timer(int x)
-{
-    
+//Time function algorithm
+void timer_internal(int x)
+{   
+    int minutes, seconds;
+    minutes = seconds = 0;
+    minutes = x;
+        //we start the timer
+
+
+        while(minutes != 0)
+        {   system("cls");
+            minutes -= 1;
+            seconds = 60;
+
+            printf("TIME: %02d : %02d ",minutes,seconds);
+            seconds-=1;
+            sleep(1);
+        }
 }

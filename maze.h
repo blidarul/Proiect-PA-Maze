@@ -36,6 +36,6 @@ void RandomizeMaze(Cell** path, int height, int width, Root *root, long long cou
 void InitializeMaze(Cell **path, int mazeHeight, int mazeWidth);
 
 //Timer function (just the basics)
-void timer();
+void timer(int x);
 
 #endif
