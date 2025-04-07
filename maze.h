@@ -29,4 +29,7 @@ int setDir(Cell* cell, unsigned int east, unsigned int north, unsigned int west,
 void RandomizeMaze(Cell** path, int height, int width, Root *root, long long count);
 void InitializeMaze(Cell **path, int mazeHeight, int mazeWidth);
 
+//Timer function (just the basics)
+void timer(int minutes_input);
+
 #endif
