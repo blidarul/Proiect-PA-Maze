@@ -1,23 +1,35 @@
-#ifndef MAZE_H      // Check if not defined
-#define MAZE_H      // Define it
+#ifndef MAZE_H
+#define MAZE_H
 
-//#include <raylib.h>
+// Ensure the header guard is properly defined
 
-//Using bit manipulation to save memory
-    //unsigned char directions = 0b00000000;
-    //most significant 2 bits is east
-    //then north
-    //then west
-    //then south
-    //EE NN WW SS
+#include <stdbool.h>
 
-const unsigned int NO_PATH = 0;
-const unsigned int OUTGOING_PATH = 2;
-const unsigned int INCOMING_PATH = 1;
+typedef enum {
+    NO_PATH = 0,
+    INCOMING_PATH = 1,
+    OUTGOING_PATH = 2
+} PathType;
 
-int getDir(unsigned char directions, unsigned int *east,unsigned int *north,unsigned int *west,unsigned int *south);
-int setDir(unsigned char *directions,unsigned int east,unsigned int north,unsigned int west,unsigned int south);
+typedef struct {
+    unsigned char paths;
+    bool visited;
+    bool onPath;
+} Cell;
 
+typedef struct root {
+    int x, y;
+} Root;
 
+// Update function declarations to match implementation
+Cell** createMaze(int height, int width);
+void setCell(Cell* cell, unsigned char paths, bool visited, bool onPath);
+void getDir(Cell cell, unsigned int *east, unsigned int *north, unsigned int *west, unsigned int *south);
+int setDir(Cell* cell, unsigned int east, unsigned int north, unsigned int west, unsigned int south);
+void RandomizeMaze(Cell** path, int height, int width, Root *root, long long count);
+void InitializeMaze(Cell **path, int mazeHeight, int mazeWidth);
 
-#endif              //End
+//Timer function (just the basics)
+void timer(int minutes_input);
+
+#endif
