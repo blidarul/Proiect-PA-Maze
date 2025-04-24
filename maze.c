@@ -41,6 +41,7 @@ int setDir(Cell *cell, unsigned int east, unsigned int north, unsigned int west,
 {
     if ((east > 2 || north > 2) || (west > 2 || south > 2))
         return -1;
+    
     cell->paths = (east << 6) | (north << 4) | (west << 2) | south;
     return 0;
 }

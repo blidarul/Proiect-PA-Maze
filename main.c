@@ -37,7 +37,8 @@ int main()
     const int mazeHeight = screenHeight / SCALE;
 
     Cell **path = createMaze(mazeHeight, mazeWidth);
-    if (path == NULL) {
+    if (path == NULL)
+    {
         fprintf(stderr, "Memory allocation failed for path.\n");
         return -1;
     }
@@ -62,8 +63,10 @@ int main()
     CloseWindow(); // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
-    for (int i = 0; i < mazeHeight; i++) {
-        if (path[i] != NULL) {
+    for (int i = 0; i < mazeHeight; i++)
+    {
+        if (path[i] != NULL)
+        {
             free(path[i]);
         }
     }
@@ -73,8 +76,10 @@ int main()
 
 static void DrawWalls(Cell **path, int height, int width)
 {
-    for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
             unsigned int east, north, west, south;
             getDir(path[i][j], &east, &north, &west, &south);
             int x = j * SCALE;

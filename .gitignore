@@ -405,3 +405,4 @@ a.out
 main.o
 .vscode/settings.json
 .vscode/tasks.json
+.idea/*
