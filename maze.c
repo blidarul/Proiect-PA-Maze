@@ -1,9 +1,5 @@
-#include <stdlib.h>
-#include <stdbool.h>
-#include <time.h>
-
 #include "maze.h"
-// Update allocation to use Cell structure
+
 Cell **createMaze(int height, int width)
 {
     Cell **maze = (Cell **)malloc(height * sizeof(Cell *));
@@ -20,15 +16,6 @@ Cell **createMaze(int height, int width)
     return maze;
 }
 
-// Helper functions to work with Cell structure
-void setCell(Cell *cell, unsigned char paths, bool visited, bool onPath)
-{
-    cell->paths = paths;
-    cell->visited = visited;
-    cell->onPath = onPath;
-}
-
-// Update existing functions to use Cell structure
 void getDir(Cell cell, unsigned int *east, unsigned int *north, unsigned int *west, unsigned int *south)
 {
     *east = (cell.paths >> 6) & 0b00000011;
@@ -43,6 +30,7 @@ int setDir(Cell *cell, unsigned int east, unsigned int north, unsigned int west,
         return -1;
     
     cell->paths = (east << 6) | (north << 4) | (west << 2) | south;
+    
     return 0;
 }
 
@@ -192,4 +180,61 @@ void RandomizeMaze(Cell **path, int height, int width, Root *root, long long cou
         }
         i++;
     }
+}
+
+Image ConvertMazeToImage(Cell **path, int height, int width, Root root)
+{
+    // Create an image with dimensions 2*width+1 x 2*height+1
+    // This gives us 1 pixel per cell and 1 pixel per wall
+    const int imageWidth = width * 2 + 1;
+    const int imageHeight = height * 2 + 1;
+    
+    // Create an image filled with white (walls everywhere)
+    Image mazeImage = GenImageColor(imageWidth, imageHeight, WHITE);
+    
+    // Process each cell in the maze
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            unsigned int east, north, west, south;
+            getDir(path[i][j], &east, &north, &west, &south);
+            
+            // Calculate the cell's pixel position (cells are at even coordinates)
+            int cellX = j * 2 + 1;
+            int cellY = i * 2 + 1;
+            
+            // Make the cell itself white
+            if(i == root.x && j == root.y)
+            {
+                ImageDrawPixel(&mazeImage, cellX, cellY, RED); // Mark the root cell in red
+            }
+            else
+            {
+                ImageDrawPixel(&mazeImage, cellX, cellY, BLACK); // Mark the cell in black
+            } 
+
+            if (north == 1)
+            {
+                ImageDrawPixel(&mazeImage, cellX, cellY - 1, BLACK);
+            }
+
+            if (west == 1)
+            {
+                ImageDrawPixel(&mazeImage, cellX - 1, cellY, BLACK);
+            }
+
+            if(east == 1)
+            {
+                ImageDrawPixel(&mazeImage, cellX + 1, cellY, BLACK);
+            }
+
+            if(south == 1)
+            {
+                ImageDrawPixel(&mazeImage, cellX, cellY + 1, BLACK);
+            }
+        }
+    }
+    
+    return mazeImage;
 }
