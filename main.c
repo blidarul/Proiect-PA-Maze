@@ -19,7 +19,8 @@ int main()
     //_________________________________________________________________________
     const int screenWidth = SCREEN_WIDTH;
     const int screenHeight = SCREEN_HEIGHT;
-    
+    SetConfigFlags(FLAG_MSAA_4X_HINT);  // Enable Multi Sampling Anti Aliasing 4x (if available)
+
     InitWindow(screenWidth, screenHeight, "maze");
     SetTargetFPS(120);
     //--------------------------------------------------------------------
@@ -53,11 +54,13 @@ int main()
 
     //Generate the image coresponding to the maze and create the cubic map and texture
     //_________________________________________________________________________
-    Image mazeImage = ConvertMazeToImage(path, mazeHeight, mazeWidth, root);
+    Image minimap = { 0 };
+    Image mazeImage = ConvertMazeToCubicMap(path, mazeHeight, mazeWidth, root, &minimap); // Convert maze to cubicmap image
     
     ExportImage(mazeImage, "resources/maze.png");     // Export maze image to file (for debugging purposes)
 
     Texture2D cubicmap = LoadTextureFromImage(mazeImage);       // Convert image to texture to display (VRAM)
+    Texture2D minimapTexture = LoadTextureFromImage(minimap); // Convert image to texture to display (VRAM)
     Mesh mesh = GenMeshCubicmap(mazeImage, (Vector3){ 1.0f, 1.0f, 1.0f });
     Model model = LoadModelFromMesh(mesh);
     //--------------------------------------------------------------------
@@ -80,7 +83,7 @@ int main()
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
         // Update
-        //----------------------------------------------------------------------------------
+        //_________________________________________________________________________
         Vector3 oldCamPos = camera.position;    // Store old camera position
 
         UpdateCamera(&camera, CAMERA_FIRST_PERSON);
@@ -101,9 +104,9 @@ int main()
 
         // Check map collisions using image data and player position
         // TODO: Improvement: Just check player surrounding cells for collision
-        for (int y = 0; y < cubicmap.height; y++)
+        for (int y = playerCellY - 1; y < cubicmap.height && y <= playerCellY + 1; y++)
         {
-            for (int x = 0; x < cubicmap.width; x++)
+            for (int x = playerCellX - 1; x < cubicmap.width && x <= playerCellX + 1; x++)
             {
                 if ((mapPixels[y*cubicmap.width + x].r == 255) &&       // Collision: white pixel, only check R channel
                     (CheckCollisionCircleRec(playerPos, playerRadius,
@@ -114,10 +117,10 @@ int main()
                 }
             }
         }
-        //----------------------------------------------------------------------------------
+        //--------------------------------------------------------------------
 
         // Draw
-        //----------------------------------------------------------------------------------
+        //_________________________________________________________________________
         BeginDrawing();
 
             ClearBackground(RAYWHITE);
@@ -126,22 +129,27 @@ int main()
                 DrawModel(model, mapPosition, 1.0f, WHITE);                     // Draw maze map
             EndMode3D();
 
-            DrawTextureEx(cubicmap, (Vector2){ GetScreenWidth() - cubicmap.width*4.0f - 20, 20.0f }, 0.0f, 4.0f, WHITE);
-            DrawRectangleLines(GetScreenWidth() - cubicmap.width*4 - 20, 20, cubicmap.width*4, cubicmap.height*4, GREEN);
+            DrawTextureEx(minimapTexture, (Vector2){ GetScreenWidth() - minimapTexture.width*4.0f - 20, 20.0f }, 0.0f, 4.0f, WHITE);
+            DrawRectangleLines(GetScreenWidth() - minimapTexture.width*4 - 20, 20, minimapTexture.width*4, minimapTexture.height*4, GREEN);
 
             // Draw player position radar
-            DrawRectangle(GetScreenWidth() - cubicmap.width*4 - 20 + playerCellX*4, 20 + playerCellY*4, 4, 4, RED);
+            DrawRectangle(GetScreenWidth() - minimapTexture.width*4 - 20 + playerCellX*4, 20 + playerCellY*4, 4, 4, BLUE);
 
             DrawFPS(10, 10);
 
         EndDrawing();
-        //----------------------------------------------------------------------------------
+        //--------------------------------------------------------------------
     }
     
     // De-Initialization
     //_________________________________________________________________________
-    UnloadTexture(cubicmap);
-    UnloadImage(mazeImage);
+    
+    UnloadImageColors(mapPixels);   // Unload color array
+    UnloadTexture(cubicmap);        // Unload cubicmap texture
+    UnloadTexture(texture);         // Unload map texture
+    UnloadModel(model);             // Unload map model
+    UnloadMesh(mesh);               // Unload map mesh
+
     CloseWindow(); // Close window and OpenGL context
     
     for (int i = 0; i < mazeHeight; i++)
@@ -151,6 +159,7 @@ int main()
             free(path[i]);
         }
     }
+    free(path);
     //--------------------------------------------------------------------
 
     return 0;

@@ -182,7 +182,7 @@ void RandomizeMaze(Cell **path, int height, int width, Root *root, long long cou
     }
 }
 
-Image ConvertMazeToImage(Cell **path, int height, int width, Root root)
+Image ConvertMazeToCubicMap(Cell **path, int height, int width, Root root, Image *minimap)
 {
     // Create an image with dimensions 2*width+1 x 2*height+1
     // This gives us 1 pixel per cell and 1 pixel per wall
@@ -190,7 +190,8 @@ Image ConvertMazeToImage(Cell **path, int height, int width, Root root)
     const int imageHeight = height * 2 + 1;
     
     // Create an image filled with white (walls everywhere)
-    Image mazeImage = GenImageColor(imageWidth, imageHeight, WHITE);
+    Image cubicmap = GenImageColor(imageWidth, imageHeight, WHITE);
+    *minimap = GenImageColor(imageWidth, imageHeight, BLACK);
     
     // Process each cell in the maze
     for (int i = 0; i < height; i++)
@@ -204,37 +205,40 @@ Image ConvertMazeToImage(Cell **path, int height, int width, Root root)
             int cellX = j * 2 + 1;
             int cellY = i * 2 + 1;
             
-            // Make the cell itself white
-            if(i == root.x && j == root.y)
-            {
-                ImageDrawPixel(&mazeImage, cellX, cellY, RED); // Mark the root cell in red
-            }
-            else
-            {
-                ImageDrawPixel(&mazeImage, cellX, cellY, BLACK); // Mark the cell in black
-            } 
+            // Make the cell itself black in the cubic map
+            ImageDrawPixel(&cubicmap, cellX, cellY, BLACK);
+
+            // Make the cell itself white in the minimap
+            ImageDrawPixel(minimap, cellX, cellY, WHITE);
 
             if (north == 1)
             {
-                ImageDrawPixel(&mazeImage, cellX, cellY - 1, BLACK);
+                ImageDrawPixel(&cubicmap, cellX, cellY - 1, BLACK);
+                ImageDrawPixel(minimap, cellX, cellY - 1, WHITE);
             }
 
             if (west == 1)
             {
-                ImageDrawPixel(&mazeImage, cellX - 1, cellY, BLACK);
+                ImageDrawPixel(&cubicmap, cellX - 1, cellY, BLACK);
+                ImageDrawPixel(minimap, cellX - 1, cellY, WHITE);
             }
 
             if(east == 1)
             {
-                ImageDrawPixel(&mazeImage, cellX + 1, cellY, BLACK);
+                ImageDrawPixel(&cubicmap, cellX + 1, cellY, BLACK);
+                ImageDrawPixel(minimap, cellX + 1, cellY, WHITE);
             }
 
             if(south == 1)
             {
-                ImageDrawPixel(&mazeImage, cellX, cellY + 1, BLACK);
+                ImageDrawPixel(&cubicmap, cellX, cellY + 1, BLACK);
+                ImageDrawPixel(minimap, cellX, cellY + 1, WHITE);
             }
         }
     }
+
+    // Make the root cell red on the minimap
+    ImageDrawPixel(minimap, root.x * 2 + 1, root.y * 2 + 1, RED);
     
-    return mazeImage;
+    return cubicmap;
 }
