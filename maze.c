@@ -182,7 +182,7 @@ void RandomizeMaze(Cell **path, int height, int width, Root *root, long long cou
     }
 }
 
-Image ConvertMazeToCubicMap(Cell **path, int height, int width, Root root, Image *minimap)
+Image ConvertMazeToCubicMap(Cell **path, int height, int width, Image *minimap)
 {
     // Create an image with dimensions 2*width+1 x 2*height+1
     // This gives us 1 pixel per cell and 1 pixel per wall
@@ -236,9 +236,6 @@ Image ConvertMazeToCubicMap(Cell **path, int height, int width, Root root, Image
             }
         }
     }
-
-    // Make the root cell red on the minimap
-    ImageDrawPixel(minimap, root.x * 2 + 1, root.y * 2 + 1, RED);
     
     return cubicmap;
 }

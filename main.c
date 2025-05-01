@@ -1,158 +1,245 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
-
 #include "raylib.h"
+#include "raymath.h"
 #include "maze.h"
-#include "player.h"
 
-
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 720
+// Constants
+#define SCREEN_WIDTH 1600
+#define SCREEN_HEIGHT 900
 #define MAZE_SIZE 20
+#define MINIMAP_SCALE 5.0f
+#define PLAYER_COLOR RED
+#define MINIMAP_DIST_FROM_BORDER 20.0f
+#define PLAYER_RADIUS 0.1f
 
+// Global structure to hold game resources
+typedef struct
+{
+    Model model;
+    Mesh mesh;
+    Texture2D texture;
+    Texture2D cubicmap;
+    Texture2D minimapTexture;
+    Color *mapPixels;
+    Vector3 mapPosition;
+} GameResources;
+
+// Function prototypes
+void InitializeWindow(int width, int height, const char* title);
+Camera InitializeCamera(void);
+Cell** InitializeMazeData(int height, int width, Root* root);
+GameResources LoadGameResources(Cell** path, int height, int width);
+void UnloadGameResources(GameResources* resources);
+void UpdatePlayerMovement(Camera* camera, Vector3* oldCamPos);
+void HandleCollisions(Camera* camera, Vector3 oldCamPos, GameResources resources, 
+                     int playerCellX, int playerCellY);
+void RenderFrame(Camera camera, GameResources resources, Root root, int playerCellX, int playerCellY);
+void CleanupResources(GameResources* resources, Cell** path, int height);
 
 int main()
 {
+    // Initialize window
+    InitializeWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "maze");
     
-    // Initialize the window and OpenGL context
-    //_________________________________________________________________________
-    const int screenWidth = SCREEN_WIDTH;
-    const int screenHeight = SCREEN_HEIGHT;
-    SetConfigFlags(FLAG_MSAA_4X_HINT);  // Enable Multi Sampling Anti Aliasing 4x (if available)
-
-    InitWindow(screenWidth, screenHeight, "maze");
-    SetTargetFPS(120);
-    //--------------------------------------------------------------------
+    // Initialize camera
+    Camera camera = InitializeCamera();
     
-    // Define the camera to look into our 3d world
-    //_________________________________________________________________________
-    Camera camera = { 0 };
-    camera.position = (Vector3){ 0.2f, 0.4f, 0.2f };    // Camera position
-    camera.target = (Vector3){ 0.185f, 0.4f, 0.0f };    // Camera looking at point
-    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
-    camera.fovy = 45.0f;                                // Camera field-of-view Y
-    camera.projection = CAMERA_PERSPECTIVE;             // Camera projection type
-    //--------------------------------------------------------------------
-    
+    // Set up maze data
+    Root root;
     const int mazeWidth = MAZE_SIZE;
     const int mazeHeight = MAZE_SIZE;
+    Cell **path = InitializeMazeData(mazeHeight, mazeWidth, &root);
     
-    Cell **path = createMaze(mazeHeight, mazeWidth);
     if (path == NULL)
     {
         fprintf(stderr, "Memory allocation failed for path.\n");
         return -1;
     }
     
-    InitializeMaze(path, mazeHeight, mazeWidth);
+    // Load game resources
+    GameResources resources = LoadGameResources(path, mazeHeight, mazeWidth);
     
-    Root root = {.x = mazeHeight - 1, .y = mazeWidth - 1};
-
-    srand((unsigned int)clock());
-    RandomizeMaze(path, mazeHeight, mazeWidth, &root, mazeHeight * mazeWidth * 20);
-
-    //Generate the image coresponding to the maze and create the cubic map and texture
-    //_________________________________________________________________________
-    Image minimap = { 0 };
-    Image mazeImage = ConvertMazeToCubicMap(path, mazeHeight, mazeWidth, root, &minimap); // Convert maze to cubicmap image
+    // Set cursor constraints
+    DisableCursor();
     
-    ExportImage(mazeImage, "resources/maze.png");     // Export maze image to file (for debugging purposes)
-
-    Texture2D cubicmap = LoadTextureFromImage(mazeImage);       // Convert image to texture to display (VRAM)
-    Texture2D minimapTexture = LoadTextureFromImage(minimap); // Convert image to texture to display (VRAM)
-    Mesh mesh = GenMeshCubicmap(mazeImage, (Vector3){ 1.0f, 1.0f, 1.0f });
-    Model model = LoadModelFromMesh(mesh);
-    //--------------------------------------------------------------------
-
-    // Load maze texture and set it to the model material
-    //_________________________________________________________________________
-    Texture2D texture = LoadTexture("resources/cubicmap_atlas.png");    // Load map texture
-    model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;    // Set map diffuse texture
-    //--------------------------------------------------------------------
-
-
-    // Get map image data to be used for collision detection
-    Color *mapPixels = LoadImageColors(mazeImage); // Load image data (RAM)
-    UnloadImage(mazeImage);             // Unload image from RAM
-
-    Vector3 mapPosition = { -1.0f, 0.0f, -1.0f };  // Set model position
-
-    DisableCursor();                // Limit cursor to relative movement inside the window
-
-    while (!WindowShouldClose())    // Detect window close button or ESC key
+    // Main game loop
+    while (!WindowShouldClose())
     {
-        // Update
-        //_________________________________________________________________________
-        Vector3 oldCamPos = camera.position;    // Store old camera position
-
-        UpdateCamera(&camera, CAMERA_FIRST_PERSON);
-
-        // Check player collision (we simplify to 2D collision detection)
+        // Update player movement
+        Vector3 oldCamPos = camera.position;
+        UpdatePlayerMovement(&camera, &oldCamPos);
+        
+        // Calculate player position in grid
         Vector2 playerPos = { camera.position.x, camera.position.z };
-        float playerRadius = 0.1f;  // Collision radius (player is modelled as a cilinder for collision)
-
-        int playerCellX = (int)(playerPos.x - mapPosition.x + 0.5f);
-        int playerCellY = (int)(playerPos.y - mapPosition.z + 0.5f);
-
-        // Out-of-limits security check
-        if (playerCellX < 0) playerCellX = 0;
-        else if (playerCellX >= cubicmap.width) playerCellX = cubicmap.width - 1;
-
-        if (playerCellY < 0) playerCellY = 0;
-        else if (playerCellY >= cubicmap.height) playerCellY = cubicmap.height - 1;
-
-        // Check map collisions using image data and player position
-        // TODO: Improvement: Just check player surrounding cells for collision
-        for (int y = playerCellY - 1; y < cubicmap.height && y <= playerCellY + 1; y++)
-        {
-            for (int x = playerCellX - 1; x < cubicmap.width && x <= playerCellX + 1; x++)
-            {
-                if ((mapPixels[y*cubicmap.width + x].r == 255) &&       // Collision: white pixel, only check R channel
-                    (CheckCollisionCircleRec(playerPos, playerRadius,
-                    (Rectangle){ mapPosition.x - 0.5f + x*1.0f, mapPosition.z - 0.5f + y*1.0f, 1.0f, 1.0f })))
-                {
-                    // Collision detected, reset camera position
-                    camera.position = oldCamPos;
-                }
-            }
-        }
-        //--------------------------------------------------------------------
-
-        // Draw
-        //_________________________________________________________________________
-        BeginDrawing();
-
-            ClearBackground(RAYWHITE);
-
-            BeginMode3D(camera);
-                DrawModel(model, mapPosition, 1.0f, WHITE);                     // Draw maze map
-            EndMode3D();
-
-            DrawTextureEx(minimapTexture, (Vector2){ GetScreenWidth() - minimapTexture.width*4.0f - 20, 20.0f }, 0.0f, 4.0f, WHITE);
-            DrawRectangleLines(GetScreenWidth() - minimapTexture.width*4 - 20, 20, minimapTexture.width*4, minimapTexture.height*4, GREEN);
-
-            // Draw player position radar
-            DrawRectangle(GetScreenWidth() - minimapTexture.width*4 - 20 + playerCellX*4, 20 + playerCellY*4, 4, 4, BLUE);
-
-            DrawFPS(10, 10);
-
-        EndDrawing();
-        //--------------------------------------------------------------------
+        int playerCellX = (int)(playerPos.x - resources.mapPosition.x + 0.5f);
+        int playerCellY = (int)(playerPos.y - resources.mapPosition.z + 0.5f);
+        
+        // Handle bounds checking
+        playerCellX = Clamp(playerCellX, 0, resources.cubicmap.width - 1);
+        playerCellY = Clamp(playerCellY, 0, resources.cubicmap.height - 1);
+        
+        // Handle collision detection
+        HandleCollisions(&camera, oldCamPos, resources, playerCellX, playerCellY);
+        
+        // Render the frame
+        RenderFrame(camera, resources, root, playerCellX, playerCellY);
     }
     
-    // De-Initialization
-    //_________________________________________________________________________
+    // Cleanup resources
+    CleanupResources(&resources, path, mazeHeight);
     
-    UnloadImageColors(mapPixels);   // Unload color array
-    UnloadTexture(cubicmap);        // Unload cubicmap texture
-    UnloadTexture(texture);         // Unload map texture
-    UnloadModel(model);             // Unload map model
-    UnloadMesh(mesh);               // Unload map mesh
+    return 0;
+}
 
-    CloseWindow(); // Close window and OpenGL context
+// Initialize the window and OpenGL context
+void InitializeWindow(int width, int height, const char* title)
+{
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
+    InitWindow(width, height, title);
+    SetTargetFPS(60);
+}
+
+// Initialize the camera with default settings
+Camera InitializeCamera(void)
+{
+    Camera camera = { 0 };
+    camera.position = (Vector3){ 0.2f, 0.4f, 0.2f };
+    camera.target = (Vector3){ 0.185f, 0.4f, 0.0f };
+    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
+    camera.fovy = 45.0f;
+    camera.projection = CAMERA_PERSPECTIVE;
+    return camera;
+}
+
+// Initialize and set up the maze data
+Cell** InitializeMazeData(int height, int width, Root* root)
+{
+    Cell **path = createMaze(height, width);
+    if (path == NULL) return NULL;
     
-    for (int i = 0; i < mazeHeight; i++)
+    InitializeMaze(path, height, width);
+    
+    root->x = height - 1;
+    root->y = width - 1;
+    
+    srand((unsigned int)clock());
+    RandomizeMaze(path, height, width, root, height * width * 20);
+    
+    return path;
+}
+
+// Load all game resources (textures, models, etc.)
+GameResources LoadGameResources(Cell** path, int height, int width)
+{
+    GameResources resources = { 0 };
+    
+    // Generate images
+    Image minimap = { 0 };
+    Image mazeImage = ConvertMazeToCubicMap(path, height, width, &minimap);
+    
+    // Debug exports
+    ExportImage(mazeImage, "resources/cubicmap.png");
+    ExportImage(minimap, "resources/minimap.png");
+    
+    // Load textures
+    resources.cubicmap = LoadTextureFromImage(mazeImage);
+    resources.minimapTexture = LoadTextureFromImage(minimap);
+    resources.mesh = GenMeshCubicmap(mazeImage, (Vector3){ 1.0f, 1.0f, 1.0f });
+    resources.model = LoadModelFromMesh(resources.mesh);
+    
+    resources.texture = LoadTexture("resources/cubicmap_atlas.png");
+    resources.model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = resources.texture;
+    
+    // Load collision data
+    resources.mapPixels = LoadImageColors(mazeImage);
+    UnloadImage(mazeImage);
+    
+    resources.mapPosition = (Vector3){ -1.0f, 0.0f, -1.0f };
+    
+    return resources;
+}
+
+// Update player movement based on input
+void UpdatePlayerMovement(Camera* camera, Vector3* oldCamPos)
+{
+    *oldCamPos = camera->position;
+    UpdateCamera(camera, CAMERA_FIRST_PERSON);
+}
+
+// Handle player collisions with walls
+void HandleCollisions(Camera* camera, Vector3 oldCamPos, GameResources resources, 
+                     int playerCellX, int playerCellY)
+{
+    Vector2 playerPos = { camera->position.x, camera->position.z };
+    
+    for (int y = playerCellY - 1; y <= playerCellY + 1 && y < resources.cubicmap.height; y++)
+    {
+        for (int x = playerCellX - 1; x <= playerCellX + 1 && x < resources.cubicmap.width; x++)
+        {
+            if (y < 0 || x < 0) continue;
+            
+            if ((resources.mapPixels[y*resources.cubicmap.width + x].r == 255) &&
+                (CheckCollisionCircleRec(playerPos, PLAYER_RADIUS,
+                (Rectangle){ resources.mapPosition.x - 0.5f + x*1.0f, 
+                            resources.mapPosition.z - 0.5f + y*1.0f, 1.0f, 1.0f })))
+            {
+                // Collision detected, reset camera position
+                camera->position = oldCamPos;
+            }
+        }
+    }
+}
+
+// Render the frame with 3D elements and UI
+void RenderFrame(Camera camera, GameResources resources, Root root, int playerCellX, int playerCellY)
+{
+    BeginDrawing();
+    
+    ClearBackground(RAYWHITE);
+    
+    // Draw 3D scene
+    BeginMode3D(camera);
+        DrawModel(resources.model, resources.mapPosition, 1.0f, WHITE);
+    EndMode3D();
+    
+    // Draw minimap UI
+    DrawTextureEx(resources.minimapTexture, 
+                 (Vector2){ GetScreenWidth() - resources.minimapTexture.width*MINIMAP_SCALE - 
+                           MINIMAP_DIST_FROM_BORDER, MINIMAP_DIST_FROM_BORDER }, 
+                 0.0f, MINIMAP_SCALE, WHITE);
+    
+    // Draw player position on minimap
+    DrawRectangle(GetScreenWidth() - resources.minimapTexture.width*MINIMAP_SCALE - 
+                 MINIMAP_DIST_FROM_BORDER + playerCellX*MINIMAP_SCALE, 
+                 MINIMAP_DIST_FROM_BORDER + playerCellY*MINIMAP_SCALE, 
+                 MINIMAP_SCALE, MINIMAP_SCALE, PLAYER_COLOR);
+    
+    DrawFPS(10, 10);
+    
+    EndDrawing();
+}
+
+// Unload game resources
+void UnloadGameResources(GameResources* resources)
+{
+    UnloadImageColors(resources->mapPixels);
+    UnloadTexture(resources->cubicmap);
+    UnloadTexture(resources->texture);
+    UnloadTexture(resources->minimapTexture);
+    UnloadModel(resources->model);
+    UnloadMesh(resources->mesh);
+}
+
+// Cleanup all resources
+void CleanupResources(GameResources* resources, Cell** path, int height)
+{
+    UnloadGameResources(resources);
+    CloseWindow();
+    
+    // Free maze data
+    for (int i = 0; i < height; i++)
     {
         if (path[i] != NULL)
         {
@@ -160,7 +247,4 @@ int main()
         }
     }
     free(path);
-    //--------------------------------------------------------------------
-
-    return 0;
 }
