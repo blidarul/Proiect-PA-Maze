@@ -404,5 +404,5 @@ FodyWeavers.xsd
 .vscode/settings.json
 .vscode/tasks.json
 .idea/*
-resources/cubicmap.png
-resources/minimap.png
+*cubicmap.png*
+*minimap.png*

@@ -1,11 +1,10 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+
 #include "raylib.h"
 #include "gameResources.h"
-
-// Constants
-#define PLAYER_RADIUS 0.1f
+#include "config.h"
 
 // Initialize the camera with default settings
 Camera InitializeCamera(void);
