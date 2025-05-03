@@ -7,6 +7,7 @@
 #include "maze.h"
 #include "renderer.h"
 #include "gameResources.h"
+#include "gameState.h"
 #include "raymath.h"
 #include <stdlib.h>
 #include <stdio.h>
