@@ -1,9 +1,5 @@
-#include <stdlib.h>
-#include <stdbool.h>
-#include <time.h>
-
 #include "maze.h"
-// Update allocation to use Cell structure
+
 Cell **createMaze(int height, int width)
 {
     Cell **maze = (Cell **)malloc(height * sizeof(Cell *));
@@ -20,15 +16,6 @@ Cell **createMaze(int height, int width)
     return maze;
 }
 
-// Helper functions to work with Cell structure
-void setCell(Cell *cell, unsigned char paths, bool visited, bool onPath)
-{
-    cell->paths = paths;
-    cell->visited = visited;
-    cell->onPath = onPath;
-}
-
-// Update existing functions to use Cell structure
 void getDir(Cell cell, unsigned int *east, unsigned int *north, unsigned int *west, unsigned int *south)
 {
     *east = (cell.paths >> 6) & 0b00000011;
@@ -41,7 +28,9 @@ int setDir(Cell *cell, unsigned int east, unsigned int north, unsigned int west,
 {
     if ((east > 2 || north > 2) || (west > 2 || south > 2))
         return -1;
+    
     cell->paths = (east << 6) | (north << 4) | (west << 2) | south;
+    
     return 0;
 }
 
@@ -191,4 +180,62 @@ void RandomizeMaze(Cell **path, int height, int width, Root *root, long long cou
         }
         i++;
     }
+}
+
+Image ConvertMazeToCubicMap(Cell **path, int height, int width, Image *minimap)
+{
+    // Create an image with dimensions 2*width+1 x 2*height+1
+    // This gives us 1 pixel per cell and 1 pixel per wall
+    const int imageWidth = width * 2 + 1;
+    const int imageHeight = height * 2 + 1;
+    
+    // Create an image filled with white (walls everywhere)
+    Image cubicmap = GenImageColor(imageWidth, imageHeight, WHITE);
+    *minimap = GenImageColor(imageWidth, imageHeight, BLACK);
+    
+    // Process each cell in the maze
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            unsigned int east, north, west, south;
+            getDir(path[i][j], &east, &north, &west, &south);
+            
+            // Calculate the cell's pixel position (cells are at even coordinates)
+            int cellX = j * 2 + 1;
+            int cellY = i * 2 + 1;
+            
+            // Make the cell itself black in the cubic map
+            ImageDrawPixel(&cubicmap, cellX, cellY, BLACK);
+
+            // Make the cell itself white in the minimap
+            ImageDrawPixel(minimap, cellX, cellY, WHITE);
+
+            if (north == 1)
+            {
+                ImageDrawPixel(&cubicmap, cellX, cellY - 1, BLACK);
+                ImageDrawPixel(minimap, cellX, cellY - 1, WHITE);
+            }
+
+            if (west == 1)
+            {
+                ImageDrawPixel(&cubicmap, cellX - 1, cellY, BLACK);
+                ImageDrawPixel(minimap, cellX - 1, cellY, WHITE);
+            }
+
+            if(east == 1)
+            {
+                ImageDrawPixel(&cubicmap, cellX + 1, cellY, BLACK);
+                ImageDrawPixel(minimap, cellX + 1, cellY, WHITE);
+            }
+
+            if(south == 1)
+            {
+                ImageDrawPixel(&cubicmap, cellX, cellY + 1, BLACK);
+                ImageDrawPixel(minimap, cellX, cellY + 1, WHITE);
+            }
+        }
+    }
+    
+    return cubicmap;
 }

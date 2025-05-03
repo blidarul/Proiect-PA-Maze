@@ -401,7 +401,8 @@ FodyWeavers.xsd
 *.exe
 *.out
 *.o
-a.out
-main.o
 .vscode/settings.json
 .vscode/tasks.json
+.idea/*
+*cubicmap.png*
+*minimap.png*
