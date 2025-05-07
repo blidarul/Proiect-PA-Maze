@@ -6,6 +6,7 @@ Maze game for the "Algorithm Design" hackathon
 ## Requirements
 * A GCC compiler
 * An installation of [raylib](https://www.raylib.com/)
+* make
 
 ## Building 
 
