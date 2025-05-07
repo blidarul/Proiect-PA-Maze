@@ -101,7 +101,7 @@ static Cell** InitializeMazeData(int height, int width, Root* root)
     root->y = width - 1;
     
     srand((unsigned int)clock());
-    RandomizeMaze(path, height, width, root, height * width * 20);
+    RandomizeMaze(path, height, width, root, height * width * MAZE_SIZE);
     
     return path;
 }
