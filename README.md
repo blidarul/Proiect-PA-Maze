@@ -4,7 +4,7 @@ Maze game for the "Algorithm Design" hackathon
 * **Note:** Maze is still a work in progress, it is unknown if development will continue afterwards.
 
 ## Requirements
-* A GCC compiler
+* A C compiler
 * An installation of [raylib](https://www.raylib.com/)
 * make
 
