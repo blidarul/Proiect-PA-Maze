@@ -41,22 +41,22 @@ static void RemoveOutgoingPath(Cell **path, int x, int y, int direction)
 
     switch (direction)
     {
-    case 0: // East
+    case EAST: // East
         setDir(&path[x][y], NO_PATH, north, west, south);
         getDir(path[x][y + 1], &east, &north, &west, &south);
         setDir(&path[x][y + 1], east, north, NO_PATH, south);
         break;
-    case 1: // North
+    case NORTH: // North
         setDir(&path[x][y], east, NO_PATH, west, south);
         getDir(path[x - 1][y], &east, &north, &west, &south);
         setDir(&path[x - 1][y], east, north, west, NO_PATH);
         break;
-    case 2: // West
+    case WEST: // West
         setDir(&path[x][y], east, north, NO_PATH, south);
         getDir(path[x][y - 1], &east, &north, &west, &south);
         setDir(&path[x][y - 1], NO_PATH, north, west, south);
         break;
-    case 3: // South
+    case SOUTH: // South
         setDir(&path[x][y], east, north, west, NO_PATH);
         getDir(path[x + 1][y], &east, &north, &west, &south);
         setDir(&path[x + 1][y], east, NO_PATH, west, south);
@@ -124,7 +124,7 @@ void RandomizeMaze(Cell **path, int height, int width, Root *root, long long cou
 
         switch (random)
         {
-        case 0: // picked east
+        case EAST: // picked east
             // make an outgoing path east
             setDir(&path[root->x][root->y], OUTGOING_PATH, north, west, south);
             // change the new root to be east of the old one
@@ -133,7 +133,7 @@ void RandomizeMaze(Cell **path, int height, int width, Root *root, long long cou
             getDir(path[root->x][root->y], &east, &north, &west, &south);
             setDir(&path[root->x][root->y], east, north, INCOMING_PATH, south);
             break;
-        case 1: // picked north
+        case NORTH: // picked north
             setDir(&path[root->x][root->y], east, OUTGOING_PATH, west, south);
             // change the new root to be north of the old one
             root->x--;
@@ -141,7 +141,7 @@ void RandomizeMaze(Cell **path, int height, int width, Root *root, long long cou
             getDir(path[root->x][root->y], &east, &north, &west, &south);
             setDir(&path[root->x][root->y], east, north, west, INCOMING_PATH);
             break;
-        case 2: // picked west
+        case WEST: // picked west
             setDir(&path[root->x][root->y], east, north, OUTGOING_PATH, south);
             // change the new root to be west of the old one
             root->y--;
@@ -149,7 +149,7 @@ void RandomizeMaze(Cell **path, int height, int width, Root *root, long long cou
             getDir(path[root->x][root->y], &east, &north, &west, &south);
             setDir(&path[root->x][root->y], INCOMING_PATH, north, west, south);
             break;
-        case 3: // picked south
+        case SOUTH: // picked south
             setDir(&path[root->x][root->y], east, north, west, OUTGOING_PATH);
             // change the new root to be south of the old one
             root->x++;
@@ -164,19 +164,19 @@ void RandomizeMaze(Cell **path, int height, int width, Root *root, long long cou
         getDir(path[root->x][root->y], &east, &north, &west, &south);
         if (east == OUTGOING_PATH)
         {
-            RemoveOutgoingPath(path, root->x, root->y, 0);
+            RemoveOutgoingPath(path, root->x, root->y, EAST);
         }
         else if (north == OUTGOING_PATH)
         {
-            RemoveOutgoingPath(path, root->x, root->y, 1);
+            RemoveOutgoingPath(path, root->x, root->y, NORTH);
         }
         else if (west == OUTGOING_PATH)
         {
-            RemoveOutgoingPath(path, root->x, root->y, 2);
+            RemoveOutgoingPath(path, root->x, root->y, WEST);
         }
         else if (south == OUTGOING_PATH)
         {
-            RemoveOutgoingPath(path, root->x, root->y, 3);
+            RemoveOutgoingPath(path, root->x, root->y, SOUTH);
         }
         i++;
     }

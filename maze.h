@@ -14,6 +14,13 @@ typedef enum
     OUTGOING_PATH = 2
 } PathType;
 
+typedef enum {
+    EAST = 0,
+    NORTH = 1,
+    WEST = 2,
+    SOUTH = 3,
+} Direction;
+
 typedef struct
 {
     unsigned char paths;
