@@ -22,6 +22,9 @@ void InitGame(void)
     // Initialize audio device
     InitAudioDevice();
     InitStepSounds("resources");
+
+    // Initialize music
+    InitBGM("resources/music.wav");
     
     // Set up maze data
     root = (Root){0};
@@ -87,6 +90,7 @@ void RunGameLoop(void)
         }
 
         UpdateStepSounds();
+        UpdateBGM();
 
     }
 }
@@ -99,6 +103,7 @@ void CleanupGame(void)
     // Clean up loaded sounds
     UnloadStepSounds();     
     CloseAudioDevice();
+    UnloadBGM();
 }
 
 static Cell** InitializeMazeData(int height, int width, Root* root)
