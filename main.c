@@ -1,7 +1,3 @@
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
-#include <math.h>
 #include "raylib.h"
 #include "raymath.h"
 #include "maze.h"
