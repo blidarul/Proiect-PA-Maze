@@ -19,6 +19,13 @@ void InitGame(void)
     // Initialize camera
     camera = InitializeCamera();
     
+    // Initialize audio device
+    InitAudioDevice();
+    InitStepSounds("resources");
+
+    // Initialize music
+    InitBGM("resources/music.wav");
+    
     // Set up maze data
     root = (Root){0};
     path = InitializeMazeData(mazeHeight, mazeWidth, &root);
@@ -81,6 +88,10 @@ void RunGameLoop(void)
                 // Handle game over state
                 break;
         }
+
+        UpdateStepSounds();
+        UpdateBGM();
+
     }
 }
 
@@ -88,6 +99,11 @@ void CleanupGame(void)
 {
     // Cleanup resources
     CleanupResources(&resources, path, mazeHeight);
+    
+    // Clean up loaded sounds
+    UnloadStepSounds();     
+    CloseAudioDevice();
+    UnloadBGM();
 }
 
 static Cell** InitializeMazeData(int height, int width, Root* root)
