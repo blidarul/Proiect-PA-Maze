@@ -4,7 +4,7 @@ static Music bgm;
 
 void InitBGM(const char *musicPath)
 {
-    bgm = LoadMusicStream(musicPath);   // Works with .wav
+    bgm = LoadMusicStream(musicPath);
     PlayMusicStream(bgm);
 }
 

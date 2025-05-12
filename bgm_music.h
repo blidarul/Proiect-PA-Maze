@@ -3,7 +3,7 @@
 
 #include "raylib.h"
 
-void InitBGM(const char *musicPath);  // Pass "resources/music.wav"
+void InitBGM(const char *musicPath);
 void UpdateBGM();
 void UnloadBGM();
 
