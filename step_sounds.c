@@ -1,4 +1,6 @@
 #include "step_sounds.h"
+#include <stdio.h>
+#include "raylib.h"
 
 #define STEP_SOUND_COUNT 4
 #define STEP_COOLDOWN 0.3f

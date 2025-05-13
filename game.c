@@ -1,4 +1,7 @@
 #include "game.h"
+#include <stdlib.h>
+#include <time.h>
+#include <stdio.h>
 
 // Private function prototypes
 static Cell** InitializeMazeData(int height, int width, Root* root);
