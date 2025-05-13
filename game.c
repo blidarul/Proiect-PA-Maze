@@ -79,6 +79,7 @@ void RunGameLoop(void)
                 // Handle collision detection
                 HandleCollisions(&camera, oldCamPos, oldCamTarget, resources, playerCellX, playerCellY);
                 
+                UpdateStepSounds();
                 // Render the frame
                 RenderFrame(camera, resources, root, playerCellX, playerCellY);
                 break;
@@ -92,7 +93,6 @@ void RunGameLoop(void)
                 break;
         }
 
-        UpdateStepSounds();
         UpdateBGM();
 
     }
