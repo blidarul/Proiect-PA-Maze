@@ -14,6 +14,8 @@ typedef struct
     Texture2D minimapTexture;
     Color *mapPixels;
     Vector3 mapPosition;
+    Image minimap;
+    Image cubicimage;
 } GameResources;
 
 // Load all game resources
@@ -24,5 +26,7 @@ void UnloadGameResources(GameResources* resources);
 
 // Clean up all resources including maze data
 void CleanupResources(GameResources* resources, Cell** path, int height);
+
+void UpdateMinimapTexture(GameResources* resources);
 
 #endif // GAME_RESOURCES_H
