@@ -1,10 +1,15 @@
 #ifndef GAME_RESOURCES_H
 #define GAME_RESOURCES_H
-
+#define MAX_QUESTION_SIZE 200
 #include "raylib.h"
 #include "maze.h"
 
 // Structure to hold game resources
+typedef struct {
+    char questionText[MAX_QUESTION_SIZE];
+    char answers[3];
+    char answersText[4][MAX_QUESTION_SIZE];
+} Question;
 typedef struct
 {
     Model model;
@@ -17,6 +22,7 @@ typedef struct
     Image minimap;
     Image cubicimage;
     int cellsVisited;
+    Question questions[60];
 } GameResources;
 
 // Load all game resources

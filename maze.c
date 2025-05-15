@@ -1,5 +1,5 @@
 #include "maze.h"
-
+#include "raygui.h"
 Cell **createMaze(int height, int width)
 {
     Cell **maze = (Cell **)malloc(height * sizeof(Cell *));
@@ -232,7 +232,7 @@ Image ConvertMazeToCubicMap(Cell **path, int height, int width)
     return cubicmap;
 }
 
-void RevealMinimap(Cell **path, int playerCellX, int playerCellY, Image cubicmap, Image *minimap)
+void RevealMinimap(Cell **path, int playerCellX, int playerCellY, Image cubicmap, Image *minimap, int *cellsVisited)
 {
     // Convert from grid to maze coordinates for accessing path array
     int mazeX = playerCellX / 2;
@@ -245,6 +245,7 @@ void RevealMinimap(Cell **path, int playerCellX, int playerCellY, Image cubicmap
         int cellY = playerCellY;
 
         path[mazeX][mazeY].visited = true;
+        (*cellsVisited)++;
         
         for(int i = -1; i <= 1; i++)
         for(int j = -1; j <= 1; j++)

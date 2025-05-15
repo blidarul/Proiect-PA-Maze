@@ -39,6 +39,6 @@ int setDir(Cell* cell, unsigned int east, unsigned int north, unsigned int west,
 void RandomizeMaze(Cell** path, int height, int width, Root *root, long long count);
 void InitializeMaze(Cell **path, int mazeHeight, int mazeWidth);
 Image ConvertMazeToCubicMap(Cell **path, int height, int width);
-void RevealMinimap(Cell **path, int playerCellX, int playerCellY, Image cubicmap, Image *minimap);
+void RevealMinimap(Cell **path, int playerCellX, int playerCellY, Image cubicmap, Image *minimap, int *cellsVisited);
 
 #endif

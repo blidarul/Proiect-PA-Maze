@@ -80,8 +80,7 @@ void RunGameLoop(void)
                 HandleCollisions(&camera, oldCamPos, oldCamTarget, resources, playerCellX, playerCellY);
 
                 UpdateMinimapTexture(&resources);
-                RevealMinimap(path, playerCellX, playerCellY, resources.cubicimage, &(resources.minimap));
-                
+                RevealMinimap(path, playerCellX, playerCellY, resources.cubicimage, &(resources.minimap), &(resources.cellsVisited));
                 UpdateStepSounds();
                 // Render the frame
                 RenderFrame(camera, resources, root, playerCellX, playerCellY);

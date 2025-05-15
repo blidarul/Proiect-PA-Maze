@@ -1,9 +1,38 @@
 #include "gameResources.h"
 #include <stdio.h>
-
+#include <string.h>
 GameResources LoadGameResources(Cell** path, int height, int width)
 {
     GameResources resources = { 0 };
+    FILE *questionText = fopen("resources/Questions.txt", "r");
+    FILE *answerText = fopen("resources/Answers.txt", "r");
+    char buffer[1024];
+    int i = 0, j, index;
+    while(fgets(buffer, MAX_QUESTION_SIZE, questionText)) {
+        strcpy(resources.questions[i].questionText, buffer);
+        i++;
+    }
+    i = 0;
+    while(fgets(buffer, MAX_QUESTION_SIZE, answerText)) {
+        index = 0;
+        for(j = 0; j < strlen(buffer); j++) {
+            if(buffer[j] >= 'a' && buffer[j] <= 'z') {
+                resources.questions[i].answers[index] = buffer[j];
+                index++;
+            }
+        }
+        resources.questions[i].answers[index] = '\0';
+        // reading all the possible answers into the question
+        fgets(buffer, MAX_QUESTION_SIZE, answerText);
+        strcpy(resources.questions[i].answersText[0], buffer);
+        fgets(buffer, MAX_QUESTION_SIZE, answerText);
+        strcpy(resources.questions[i].answersText[1], buffer);
+        fgets(buffer, MAX_QUESTION_SIZE, answerText);
+        strcpy(resources.questions[i].answersText[2], buffer);
+        fgets(buffer, MAX_QUESTION_SIZE, answerText);
+        strcpy(resources.questions[i].answersText[3], buffer);
+        i++;
+    }
     resources.cellsVisited = 0;
     resources.minimap = GenImageColor(width * 2 + 1, height * 2 + 1, DARKGRAY);
     // Generate images
