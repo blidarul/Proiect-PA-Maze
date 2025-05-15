@@ -10,6 +10,7 @@
 #include "gameState.h"
 #include "raymath.h"
 #include "sound.h"
+
 // Initialize the game
 void InitGame(void);
 
