@@ -16,6 +16,7 @@ typedef struct
     Vector3 mapPosition;
     Image minimap;
     Image cubicimage;
+    int cellsVisited;
 } GameResources;
 
 // Load all game resources
