@@ -10,6 +10,7 @@
 #include "gameResources.h"
 #include "config.h"
 #include "game.h"
+#include "menu.h"
 
 int main(void)
 {
