@@ -90,10 +90,7 @@ void RunGameLoop(void)
             case GAME_STATE_PAUSE:
                 // Handle pause state
                 break;
-                
-            case GAME_STATE_GAMEOVER:
-                // Handle game over state
-                break;
+
         }
 
         UpdateBGM();
