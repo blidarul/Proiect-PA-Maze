@@ -24,10 +24,10 @@ void InitGame(void)
     
     // Initialize audio device
     InitAudioDevice();
-    InitStepSounds("resources");
+    InitStepSounds("resources/Sound");
 
     // Initialize music
-    InitBGM("resources/music.wav");
+    InitBGM("resources/Sound/music.wav");
     
     // Set up maze data
     root = (Root){0};

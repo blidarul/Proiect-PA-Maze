@@ -1,13 +1,31 @@
-#include "step_sounds.h"
+#include "sound.h"
 #include <stdio.h>
 #include "raylib.h"
 
-#define STEP_SOUND_COUNT 4
-#define STEP_COOLDOWN 0.3f
+
 
 static Sound steps[STEP_SOUND_COUNT];
 static float stepTimer = 0.0f;
 static int currentStep = 0;
+
+static Music bgm;
+
+void InitBGM(const char *musicPath)
+{
+    bgm = LoadMusicStream(musicPath);
+    PlayMusicStream(bgm);
+}
+
+void UpdateBGM()
+{
+    UpdateMusicStream(bgm);
+}
+
+void UnloadBGM()
+{
+    StopMusicStream(bgm);
+    UnloadMusicStream(bgm);
+}
 
 void InitStepSounds(const char *directory)
 {
