@@ -5,31 +5,31 @@ GameResources LoadGameResources(Cell** path, int height, int width)
 {
     GameResources resources = { 0 };
     
+    resources.minimap = GenImageColor(width * 2 + 1, height * 2 + 1, DARKGRAY);
     // Generate images
-    Image minimap = { 0 };
-    Image mazeImage = ConvertMazeToCubicMap(path, height, width, &minimap);
+    resources.cubicimage = ConvertMazeToCubicMap(path, height, width);
     
-    if (mazeImage.data == NULL)
+    if (resources.cubicimage.data == NULL)
     {
         fprintf(stderr, "Failed to convert maze to cubic map\n");
         return resources; // Return empty resources
     }
     
     // Debug exports
-    if (!ExportImage(mazeImage, "resources/cubicmap.png")) 
-{
+    if (!ExportImage(resources.cubicimage, "resources/cubicmap.png")) 
+    {
         fprintf(stderr, "Warning: Failed to export cubicmap.png\n");
     }
     
-    if (!ExportImage(minimap, "resources/minimap.png"))
+    if (!ExportImage(resources.minimap, "resources/minimap.png"))
     {
         fprintf(stderr, "Warning: Failed to export minimap.png\n");
     }
     
     // Load textures
-    resources.cubicmap = LoadTextureFromImage(mazeImage);
-    resources.minimapTexture = LoadTextureFromImage(minimap);
-    resources.mesh = GenMeshCubicmap(mazeImage, (Vector3){ 1.0f, 1.0f, 1.0f });
+    resources.cubicmap = LoadTextureFromImage(resources.cubicimage);
+    resources.minimapTexture = LoadTextureFromImage(resources.minimap);
+    resources.mesh = GenMeshCubicmap(resources.cubicimage, (Vector3){ 1.0f, 1.0f, 1.0f });
     resources.model = LoadModelFromMesh(resources.mesh);
     
     resources.texture = LoadTexture("resources/cubicmap_atlas.png");
@@ -41,8 +41,7 @@ GameResources LoadGameResources(Cell** path, int height, int width)
     resources.model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = resources.texture;
     
     // Load collision data
-    resources.mapPixels = LoadImageColors(mazeImage);
-    UnloadImage(mazeImage);
+    resources.mapPixels = LoadImageColors(resources.cubicimage);
     
     resources.mapPosition = (Vector3){ -1.0f, 0.0f, -1.0f };
     
@@ -57,6 +56,15 @@ void UnloadGameResources(GameResources* resources)
     UnloadTexture(resources->minimapTexture);
     UnloadModel(resources->model);
     UnloadMesh(resources->mesh);
+}
+
+void UpdateMinimapTexture(GameResources* resources)
+{
+    // Unload the previous texture first to prevent memory leak
+    UnloadTexture(resources->minimapTexture);
+    
+    // Load the updated texture
+    resources->minimapTexture = LoadTextureFromImage(resources->minimap);
 }
 
 void CleanupResources(GameResources* resources, Cell** path, int height)

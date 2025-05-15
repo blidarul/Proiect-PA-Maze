@@ -9,12 +9,7 @@
 #include "gameResources.h"
 #include "gameState.h"
 #include "raymath.h"
-#include "step_sounds.h"
-#include "bgm_music.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-
+#include "sound.h"
 // Initialize the game
 void InitGame(void);
 
