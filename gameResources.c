@@ -5,7 +5,7 @@ GameResources LoadGameResources(Cell** path, int height, int width)
 {
     GameResources resources = { 0 };
     
-    resources.minimap = GenImageColor(width * 2 + 1, height * 2 + 1, BLACK);
+    resources.minimap = GenImageColor(width * 2 + 1, height * 2 + 1, DARKGRAY);
     // Generate images
     resources.cubicimage = ConvertMazeToCubicMap(path, height, width);
     
