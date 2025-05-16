@@ -39,7 +39,6 @@ void RenderFrame(Camera camera, GameResources resources, Root root, int playerCe
     // Draw 3D scene
     BeginMode3D(camera);
         DrawModel(resources.model, resources.mapPosition, 1.0f, WHITE);
-        QuestionPopup(&resources.cellsVisited);
     EndMode3D();
     
     // Draw UI elements
