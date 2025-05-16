@@ -1,7 +1,6 @@
 #ifndef MAZE_H
 #define MAZE_H
 
-
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
@@ -46,6 +45,6 @@ int setDir(Cell* cell, unsigned int east, unsigned int north, unsigned int west,
 void RandomizeMaze(Maze *maze, int height, int width, long long count);
 void InitializeMaze(Maze *maze, int mazeHeight, int mazeWidth);
 Image ConvertMazeToCubicMap(Maze *maze, int height, int width);
-void VisitCell(Maze *maze, int playerCellX, int playerCellY, Image cubicmap, Image *minimap);
+void RevealMinimap(Maze *maze, int playerCellX, int playerCellY, Image cubicmap, Image *minimap);
 
 #endif

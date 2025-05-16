@@ -5,6 +5,7 @@
 
 // Private function prototypes
 static Maze* InitializeMazeData(int height, int width);
+static void VisitCell(Maze *maze, int playerCellX, int playerCellY, GameResources *resources);
 
 // Game state variables
 static Camera camera;
@@ -76,8 +77,7 @@ void RunGameLoop(void)
                 // Handle collision detection
                 HandleCollisions(&camera, oldCamPos, oldCamTarget, resources, playerCellX, playerCellY);
 
-                UpdateMinimapTexture(&resources);
-                VisitCell(maze, playerCellX, playerCellY, resources.cubicimage, &(resources.minimap));
+                VisitCell(maze, playerCellX, playerCellY, &resources);
                 UpdateStepSounds();
                 // Render the frame
                 RenderFrame(camera, resources, maze->root, playerCellX, playerCellY);
@@ -119,4 +119,19 @@ static Maze* InitializeMazeData(int height, int width)
     RandomizeMaze(maze, height, width, height * width * MAZE_SIZE);
     
     return maze;
+}
+
+static void VisitCell(Maze *maze, int playerCellX, int playerCellY, GameResources *resources)
+{
+    // Convert from grid to maze coordinates for accessing path array
+    int mazeX = playerCellX / 2;
+    int mazeY = playerCellY / 2;
+
+    if(!maze->path[mazeX][mazeY].visited)
+    {
+        maze->path[mazeX][mazeY].visited = true;
+        maze->cellsVisited ++;
+        RevealMinimap(maze, playerCellX, playerCellY, resources->cubicimage, &resources->minimap);
+        UpdateMinimapTexture(resources);
+    }
 }

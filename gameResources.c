@@ -1,6 +1,7 @@
 #include "gameResources.h"
 #include <stdio.h>
 #include <string.h>
+
 GameResources LoadGameResources(Maze *maze, int height, int width)
 {
     GameResources resources = { 0 };
@@ -84,6 +85,8 @@ void UnloadGameResources(GameResources* resources)
     UnloadTexture(resources->minimapTexture);
     UnloadModel(resources->model);
     UnloadMesh(resources->mesh);
+    UnloadImage(resources->cubicimage);
+    UnloadImage(resources->minimap);
 }
 
 void UpdateMinimapTexture(GameResources* resources)
