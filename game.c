@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
 
 // Private function prototypes
 static Maze* InitializeMazeData(int height, int width);
@@ -85,6 +87,9 @@ void RunGameLoop(void)
                 
             case GAME_STATE_PAUSE:
                 // Handle pause state
+                break;
+            case GAME_STATE_QUESTION:
+                
                 break;
 
         }
