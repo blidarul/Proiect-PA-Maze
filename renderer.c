@@ -1,5 +1,7 @@
 #include "renderer.h"
+#define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
+
 void InitializeWindow(int width, int height, const char* title)
 {
     SetConfigFlags(FLAG_MSAA_4X_HINT);

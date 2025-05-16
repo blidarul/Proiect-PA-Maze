@@ -10,10 +10,9 @@
 Camera InitializeCamera(void);
 
 // Handle player movement based on input
-void UpdatePlayerMovement(Camera* camera, Vector3* oldCamPos, Vector3* oldCamTarget);
+void UpdatePlayerMovement(Camera* camera, GameResources resources);
 
 // Handle player collisions with walls
-void HandleCollisions(Camera* camera, Vector3 oldCamPos, Vector3 oldCamTarget, 
-                     GameResources resources, int playerCellX, int playerCellY);
+void HandleCollisions(Camera *camera, Vector3 *localMovement, GameResources resources);
 
 #endif // CAMERA_H

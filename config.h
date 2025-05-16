@@ -14,4 +14,12 @@
 #define PLAYER_COLOR RED
 #define MINIMAP_DIST_FROM_BORDER 20.0f
 
+//movement related
+#define DEFAULT_MOUSE_SENSITIVITY 0.1f
+#define PLAYER_SPEED 2.0f
+
+//sound related
+#define STEP_SOUND_COUNT 4
+#define STEP_COOLDOWN 1.0f / PLAYER_SPEED;
+
 #endif // CONFIG_H
