@@ -5,11 +5,6 @@
 #include "maze.h"
 
 // Structure to hold game resources
-typedef struct {
-    char questionText[MAX_QUESTION_SIZE];
-    char answers[3];
-    char answersText[4][MAX_QUESTION_SIZE];
-} Question;
 typedef struct
 {
     Model model;
@@ -21,7 +16,6 @@ typedef struct
     Vector3 mapPosition;
     Image minimap;
     Image cubicimage;
-    Question questions[60];
 } GameResources;
 
 // Load all game resources
