@@ -128,33 +128,33 @@ void RandomizeMaze(Maze *maze, int height, int width, long long count)
         case EAST: // picked east
             // make an outgoing path east
             setDir(&maze->path[maze->root.x][maze->root.y], OUTGOING_PATH, north, west, south);
-            // change the new maze->root.o be east of the old one
+            // change the new root to be east of the old one
             maze->root.y++;
-            // replace west path from the new maze->root.ith an incoming path
+            // replace west path from the new root with an incoming path
             getDir(maze->path[maze->root.x][maze->root.y], &east, &north, &west, &south);
             setDir(&maze->path[maze->root.x][maze->root.y], east, north, INCOMING_PATH, south);
             break;
         case NORTH: // picked north
             setDir(&maze->path[maze->root.x][maze->root.y], east, OUTGOING_PATH, west, south);
-            // change the new maze->root.o be north of the old one
+            // change the new root to be north of the old one
             maze->root.x--;
-            // replace south path from the new maze->root.ith an incoming path
+            // replace south path from the new root with an incoming path
             getDir(maze->path[maze->root.x][maze->root.y], &east, &north, &west, &south);
             setDir(&maze->path[maze->root.x][maze->root.y], east, north, west, INCOMING_PATH);
             break;
         case WEST: // picked west
             setDir(&maze->path[maze->root.x][maze->root.y], east, north, OUTGOING_PATH, south);
-            // change the new maze->root.o be west of the old one
+            // change the new root to be west of the old one
             maze->root.y--;
-            // replace east path from the new maze->root.ith an incoming path
+            // replace east path from the new root with an incoming path
             getDir(maze->path[maze->root.x][maze->root.y], &east, &north, &west, &south);
             setDir(&maze->path[maze->root.x][maze->root.y], INCOMING_PATH, north, west, south);
             break;
         case SOUTH: // picked south
             setDir(&maze->path[maze->root.x][maze->root.y], east, north, west, OUTGOING_PATH);
-            // change the new maze->root.o be south of the old one
+            // change the new root to be south of the old one
             maze->root.x++;
-            // replace north path from the new maze->root.ith an incoming path
+            // replace north path from the new root with an incoming path
             getDir(maze->path[maze->root.x][maze->root.y], &east, &north, &west, &south);
             setDir(&maze->path[maze->root.x][maze->root.y], east, INCOMING_PATH, west, south);
             break;
