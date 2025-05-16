@@ -67,6 +67,7 @@ static void RemoveOutgoingPath(Maze *maze, int x, int y, int direction)
 
 void InitializeMaze(Maze *maze, int mazeHeight, int mazeWidth)
 {
+    maze->cellsVisited = 0;
     for (int i = 0; i < mazeHeight; i++)
     {
         for (int j = 0; j < mazeWidth; j++)
@@ -262,6 +263,7 @@ void VisitCell(Maze *maze, int playerCellX, int playerCellY, Image cubicmap, Ima
     if(!maze->path[mazeX][mazeY].visited)
     {
         maze->path[mazeX][mazeY].visited = true;
+        maze->cellsVisited ++;
         RevealMinimap(maze, playerCellX, playerCellY, cubicmap, minimap);
     }
 }
