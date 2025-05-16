@@ -4,12 +4,11 @@
 #include <stdio.h>
 
 // Private function prototypes
-static Cell** InitializeMazeData(int height, int width, Root* root);
+static Maze* InitializeMazeData(int height, int width);
 
 // Game state variables
 static Camera camera;
-static Root root;
-static Cell **path;
+static Maze *maze;
 static GameResources resources;
 static const int mazeWidth = MAZE_SIZE;
 static const int mazeHeight = MAZE_SIZE;
@@ -29,18 +28,16 @@ void InitGame(void)
     // Initialize music
     InitBGM("resources/Sound/music.wav");
     
-    // Set up maze data
-    root = (Root){0};
-    path = InitializeMazeData(mazeHeight, mazeWidth, &root);
+    maze = InitializeMazeData(mazeHeight, mazeWidth);
     
-    if (path == NULL)
+    if (maze == NULL)
     {
         fprintf(stderr, "Memory allocation failed for path.\n");
         exit(EXIT_FAILURE);
     }
     
     // Load game resources
-    resources = LoadGameResources(path, mazeHeight, mazeWidth);
+    resources = LoadGameResources(maze, mazeHeight, mazeWidth);
     
     // Set cursor constraints
     DisableCursor();
@@ -80,10 +77,10 @@ void RunGameLoop(void)
                 HandleCollisions(&camera, oldCamPos, oldCamTarget, resources, playerCellX, playerCellY);
 
                 UpdateMinimapTexture(&resources);
-                RevealMinimap(path, playerCellX, playerCellY, resources.cubicimage, &(resources.minimap), &(resources.cellsVisited));
+                VisitCell(maze, playerCellX, playerCellY, resources.cubicimage, &(resources.minimap));
                 UpdateStepSounds();
                 // Render the frame
-                RenderFrame(camera, resources, root, playerCellX, playerCellY);
+                RenderFrame(camera, resources, maze->root, playerCellX, playerCellY);
                 break;
                 
             case GAME_STATE_PAUSE:
@@ -100,7 +97,7 @@ void RunGameLoop(void)
 void CleanupGame(void)
 {
     // Cleanup resources
-    CleanupResources(&resources, path, mazeHeight);
+    CleanupResources(&resources, maze, mazeHeight);
     
     // Clean up loaded sounds
     UnloadStepSounds();     
@@ -108,18 +105,18 @@ void CleanupGame(void)
     UnloadBGM();
 }
 
-static Cell** InitializeMazeData(int height, int width, Root* root)
+static Maze* InitializeMazeData(int height, int width)
 {
-    Cell **path = createMaze(height, width);
-    if (path == NULL) return NULL;
+    Maze *maze = createMaze(height, width);
+    if (maze == NULL) return NULL;
     
-    InitializeMaze(path, height, width);
+    InitializeMaze(maze, height, width);
     
-    root->x = height - 1;
-    root->y = width - 1;
+    maze->root.x = height - 1;
+    maze->root.y = width - 1;
     
     srand((unsigned int)clock());
-    RandomizeMaze(path, height, width, root, height * width * MAZE_SIZE);
+    RandomizeMaze(maze, height, width, height * width * MAZE_SIZE);
     
-    return path;
+    return maze;
 }

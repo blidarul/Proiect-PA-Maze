@@ -1,7 +1,7 @@
 #include "gameResources.h"
 #include <stdio.h>
 #include <string.h>
-GameResources LoadGameResources(Cell** path, int height, int width)
+GameResources LoadGameResources(Maze *maze, int height, int width)
 {
     GameResources resources = { 0 };
     FILE *questionText = fopen("resources/Questions.txt", "r");
@@ -33,10 +33,9 @@ GameResources LoadGameResources(Cell** path, int height, int width)
         strcpy(resources.questions[i].answersText[3], buffer);
         i++;
     }
-    resources.cellsVisited = 0;
     resources.minimap = GenImageColor(width * 2 + 1, height * 2 + 1, DARKGRAY);
     // Generate images
-    resources.cubicimage = ConvertMazeToCubicMap(path, height, width);
+    resources.cubicimage = ConvertMazeToCubicMap(maze, height, width);
     
     if (resources.cubicimage.data == NULL)
     {
@@ -96,7 +95,7 @@ void UpdateMinimapTexture(GameResources* resources)
     resources->minimapTexture = LoadTextureFromImage(resources->minimap);
 }
 
-void CleanupResources(GameResources* resources, Cell** path, int height)
+void CleanupResources(GameResources* resources, Maze *maze, int height)
 {
     UnloadGameResources(resources);
     CloseWindow();
@@ -104,10 +103,11 @@ void CleanupResources(GameResources* resources, Cell** path, int height)
     // Free maze data
     for (int i = 0; i < height; i++)
     {
-        if (path[i] != NULL)
+        if (maze->path[i] != NULL)
         {
-            free(path[i]);
+            free(maze->path[i]);
         }
     }
-    free(path);
+    free(maze->path);
+    free(maze);
 }

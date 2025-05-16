@@ -33,12 +33,19 @@ typedef struct root
     int x, y;
 } Root;
 
-Cell** createMaze(int height, int width);
+typedef struct
+{
+    Cell **path;
+    unsigned int cellsVisited;
+    Root root;
+} Maze;
+
+Maze* createMaze(int height, int width);
 void getDir(Cell cell, unsigned int *east, unsigned int *north, unsigned int *west, unsigned int *south);
 int setDir(Cell* cell, unsigned int east, unsigned int north, unsigned int west, unsigned int south);
-void RandomizeMaze(Cell** path, int height, int width, Root *root, long long count);
-void InitializeMaze(Cell **path, int mazeHeight, int mazeWidth);
-Image ConvertMazeToCubicMap(Cell **path, int height, int width);
-void RevealMinimap(Cell **path, int playerCellX, int playerCellY, Image cubicmap, Image *minimap, int *cellsVisited);
+void RandomizeMaze(Maze *maze, int height, int width, long long count);
+void InitializeMaze(Maze *maze, int mazeHeight, int mazeWidth);
+Image ConvertMazeToCubicMap(Maze *maze, int height, int width);
+void VisitCell(Maze *maze, int playerCellX, int playerCellY, Image cubicmap, Image *minimap);
 
 #endif
