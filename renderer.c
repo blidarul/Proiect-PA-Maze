@@ -4,6 +4,12 @@ void InitializeWindow(int width, int height, const char* title)
 {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(width, height, title);
+    
+    // Set window icon
+    Image icon = LoadImage("resources/icon.png");
+    SetWindowIcon(icon);
+    UnloadImage(icon);
+    
     SetTargetFPS(60);
 }
 

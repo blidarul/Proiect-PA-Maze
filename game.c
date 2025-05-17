@@ -1,4 +1,7 @@
 #include "game.h"
+#include <stdlib.h>
+#include <time.h>
+#include <stdio.h>
 
 // Private function prototypes
 static Cell** InitializeMazeData(int height, int width, Root* root);
@@ -18,6 +21,13 @@ void InitGame(void)
     
     // Initialize camera
     camera = InitializeCamera();
+    
+    // Initialize audio device
+    InitAudioDevice();
+    InitStepSounds("resources");
+
+    // Initialize music
+    InitBGM("resources/music.wav");
     
     // Set up maze data
     root = (Root){0};
@@ -68,7 +78,11 @@ void RunGameLoop(void)
                 
                 // Handle collision detection
                 HandleCollisions(&camera, oldCamPos, oldCamTarget, resources, playerCellX, playerCellY);
+
+                UpdateMinimapTexture(&resources);
+                RevealMinimap(path, playerCellX, playerCellY, resources.cubicimage, &(resources.minimap));
                 
+                UpdateStepSounds();
                 // Render the frame
                 RenderFrame(camera, resources, root, playerCellX, playerCellY);
                 break;
@@ -76,11 +90,11 @@ void RunGameLoop(void)
             case GAME_STATE_PAUSE:
                 // Handle pause state
                 break;
-                
-            case GAME_STATE_GAMEOVER:
-                // Handle game over state
-                break;
+
         }
+
+        UpdateBGM();
+
     }
 }
 
@@ -88,6 +102,11 @@ void CleanupGame(void)
 {
     // Cleanup resources
     CleanupResources(&resources, path, mazeHeight);
+    
+    // Clean up loaded sounds
+    UnloadStepSounds();     
+    CloseAudioDevice();
+    UnloadBGM();
 }
 
 static Cell** InitializeMazeData(int height, int width, Root* root)

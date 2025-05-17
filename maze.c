@@ -182,7 +182,7 @@ void RandomizeMaze(Cell **path, int height, int width, Root *root, long long cou
     }
 }
 
-Image ConvertMazeToCubicMap(Cell **path, int height, int width, Image *minimap)
+Image ConvertMazeToCubicMap(Cell **path, int height, int width)
 {
     // Create an image with dimensions 2*width+1 x 2*height+1
     // This gives us 1 pixel per cell and 1 pixel per wall
@@ -191,7 +191,6 @@ Image ConvertMazeToCubicMap(Cell **path, int height, int width, Image *minimap)
     
     // Create an image filled with white (walls everywhere)
     Image cubicmap = GenImageColor(imageWidth, imageHeight, WHITE);
-    *minimap = GenImageColor(imageWidth, imageHeight, BLACK);
     
     // Process each cell in the maze
     for (int i = 0; i < height; i++)
@@ -208,34 +207,56 @@ Image ConvertMazeToCubicMap(Cell **path, int height, int width, Image *minimap)
             // Make the cell itself black in the cubic map
             ImageDrawPixel(&cubicmap, cellX, cellY, BLACK);
 
-            // Make the cell itself white in the minimap
-            ImageDrawPixel(minimap, cellX, cellY, WHITE);
-
             if (north == 1)
             {
                 ImageDrawPixel(&cubicmap, cellX, cellY - 1, BLACK);
-                ImageDrawPixel(minimap, cellX, cellY - 1, WHITE);
             }
 
             if (west == 1)
             {
                 ImageDrawPixel(&cubicmap, cellX - 1, cellY, BLACK);
-                ImageDrawPixel(minimap, cellX - 1, cellY, WHITE);
             }
 
             if(east == 1)
             {
                 ImageDrawPixel(&cubicmap, cellX + 1, cellY, BLACK);
-                ImageDrawPixel(minimap, cellX + 1, cellY, WHITE);
             }
 
             if(south == 1)
             {
                 ImageDrawPixel(&cubicmap, cellX, cellY + 1, BLACK);
-                ImageDrawPixel(minimap, cellX, cellY + 1, WHITE);
             }
         }
     }
     
     return cubicmap;
+}
+
+void RevealMinimap(Cell **path, int playerCellX, int playerCellY, Image cubicmap, Image *minimap)
+{
+    // Convert from grid to maze coordinates for accessing path array
+    int mazeX = playerCellX / 2;
+    int mazeY = playerCellY / 2;
+    
+    if(!path[mazeX][mazeY].visited)
+    {
+        // Use grid coordinates directly for image operations
+        int cellX = playerCellX;
+        int cellY = playerCellY;
+
+        path[mazeX][mazeY].visited = true;
+        
+        for(int i = -1; i <= 1; i++)
+        for(int j = -1; j <= 1; j++)
+        {
+            if(GetImageColor(cubicmap, cellX + i, cellY + j).r == 0)
+            {
+                ImageDrawPixel(minimap, cellX + i, cellY + j, WHITE);
+            }
+            else
+            {
+                ImageDrawPixel(minimap, cellX + i, cellY + j, BLACK);
+            }
+        }
+    }
 }
