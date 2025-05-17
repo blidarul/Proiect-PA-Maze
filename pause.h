@@ -4,22 +4,22 @@
 #include<stdbool.h>
 #include "raylib.h"
 
-typedef enum 
+typedef enum
 {
-    MENU_NONE = 0,
-    MENU_RESUME,
-    MENU_RESTART,
-    MENU_EXIT
-}Menu_action;
+    MENU_ACTION_NONE = 0,
+    MENU_ACTION_RESUME,
+    MENU_ACTION_RESTART,
+    MENU_ACTION_EXIT
+} Menu_action;
 
-typedef struct 
+typedef struct
 {
     Rectangle rect;
     const char *label;
     Color bg_color;
     Color text_color;
     Color hover_color;
-}Button;
+} PauseButton;
 
 typedef struct
 {
@@ -27,25 +27,22 @@ typedef struct
     Rectangle handle;
     float volume_value;
     bool dragging;
-}Slider;
+} PauseSlider;
 
 typedef struct
 {
     bool active;
-    Button resume_button;
-    Button restart_button;
-    Button exit_button;
-    Slider volume_slider;
+    PauseButton resume_button;
+    PauseButton restart_button;
+    PauseButton exit_button;
+    PauseSlider volume_slider;
     Menu_action action;
-}Pause_menu;
+} Pause_menu;
 
-Menu_action initialize_menu(Pause_menu *menu, int screen_width, int screen_height);
-
-Menu_action update_menu(Pause_menu *menu);
-
-void draw_menu(Pause_menu *menu); 
-
-void unload_menu(Pause_menu *menu);
-
+Menu_action InitializePauseControls(Pause_menu *menu, int screen_width, int screen_height);
+Menu_action UpdatePauseControls(Pause_menu *menu);
+void DrawPauseControls(const Pause_menu *menu);
+void UnloadPauseControls(Pause_menu *menu);
+// ...
 
 #endif

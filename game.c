@@ -2,10 +2,12 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
+#include "sound.h"
 
 // Private function prototypes
 static Maze* InitializeMazeData(int height, int width);
 static void VisitCell(Maze *maze, int playerCellX, int playerCellY, GameResources *resources);
+static void RestartGameplay(void);
 
 // Game state variables
 static Camera camera;
@@ -14,13 +16,14 @@ static GameResources resources;
 static const int mazeWidth = MAZE_SIZE;
 static const int mazeHeight = MAZE_SIZE;
 
+// Menu structures
+static Menu titleMenu;
+static Pause_menu pauseMenu;
+
 void InitGame(void)
 {
     // Initialize window
     InitializeWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "maze");
-    
-    // Initialize camera
-    camera = InitializeCamera();
     
     // Initialize audio device
     InitAudioDevice();
@@ -28,24 +31,25 @@ void InitGame(void)
 
     // Initialize music
     InitBGM("resources/Sound/music.wav");
-    
+
+    // Initialize game state system
+    InitGameState();
+
+    // Initialize Title Menu
+    initialize_menu(&titleMenu, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    // Initialize Camera, Maze, Resources for the first time (or after a full exit)
+    camera = InitializeCamera();
     maze = InitializeMazeData(mazeHeight, mazeWidth);
-    
     if (maze == NULL)
     {
-        fprintf(stderr, "Memory allocation failed for path.\n");
+        fprintf(stderr, "Memory allocation failed for maze.\n");
+        CloseWindow();
         exit(EXIT_FAILURE);
     }
-    
-    // Load game resources
     resources = LoadGameResources(maze, mazeHeight, mazeWidth);
     
-    // Set cursor constraints
-    DisableCursor();
-    
-    // Initialize game state
-    InitGameState();
-    SetGameState(GAME_STATE_GAMEPLAY);
+    SetGameState(GAME_STATE_TITLE);
 }
 
 void RunGameLoop(void)
@@ -53,44 +57,119 @@ void RunGameLoop(void)
     // Main game loop
     while (!WindowShouldClose())
     {
+        UpdateBGM();
+
         switch (GetGameState())
         {
             case GAME_STATE_TITLE:
-                // Handle title screen
+                update_menu(&titleMenu);
+
+                if (!titleMenu.active)
+                {
+                    SetGameState(GAME_STATE_GAMEPLAY);
+                }
+
+                BeginDrawing();
+                ClearBackground(RAYWHITE);
+                draw_menu(&titleMenu);
+                EndDrawing();
                 break;
                 
             case GAME_STATE_GAMEPLAY:
-                // Update player movement
+                if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_P))
+                {
+                    SetGameState(GAME_STATE_PAUSE);
+                    InitializePauseControls(&pauseMenu, SCREEN_WIDTH, SCREEN_HEIGHT);
+                }
+
                 UpdatePlayerMovement(&camera, resources);
 
-                // Calculate player position in grid
                 Vector2 playerPos = { camera.position.x, camera.position.z };
                 int playerCellX = (int)(playerPos.x);
                 int playerCellY = (int)(playerPos.y);
                     
-                // Handle bounds checking
-                playerCellX = Clamp(playerCellX, 0, resources.cubicmap.width - 1);
-                playerCellY = Clamp(playerCellY, 0, resources.cubicmap.height - 1);
+                playerCellX = Clamp(playerCellX, 0, resources.cubicimage.width - 1);
+                playerCellY = Clamp(playerCellY, 0, resources.cubicimage.height - 1);
                      
-
                 VisitCell(maze, playerCellX, playerCellY, &resources);
                 
-                // Render the frame
-                RenderFrame(camera, resources, maze->root, playerCellX, playerCellY);
+                BeginDrawing();
+                ClearBackground(RAYWHITE);
+                RenderFrame(camera, resources, maze->root, playerCellX, playerCellY, false);
+                EndDrawing();
                 break;
                 
             case GAME_STATE_PAUSE:
-                // Handle pause state
-                break;
-            case GAME_STATE_QUESTION:
+                Menu_action pauseAction = UpdatePauseControls(&pauseMenu);
+
+                if (pauseAction == MENU_ACTION_RESUME)
+                {
+                    SetGameState(GAME_STATE_GAMEPLAY);
+                }
+                else if (pauseAction == MENU_ACTION_RESTART)
+                {
+                    RestartGameplay();
+                    SetGameState(GAME_STATE_GAMEPLAY);
+                }
+                else if (pauseAction == MENU_ACTION_EXIT)
+                {
+                    CloseWindow();
+                }
                 
+                BeginDrawing();
+                ClearBackground(RAYWHITE);
+                RenderFrame(camera, resources, maze->root, 
+                            (int)(camera.position.x), (int)(camera.position.z), 
+                            true);
+                DrawPauseControls(&pauseMenu);
+                EndDrawing();
                 break;
 
+            case GAME_STATE_QUESTION:
+                // Handle question state if you implement it
+                BeginDrawing();
+                ClearBackground(RAYWHITE);
+                // Draw question UI
+                DrawText("Question State - Not Implemented", 20, 20, 20, DARKGRAY);
+                EndDrawing();
+                break;
         }
-
-        UpdateBGM();
-
     }
+}
+
+// Function to re-initialize game-specific elements for a restart
+static void RestartGameplay(void)
+{
+    // Unload current game resources
+    UnloadGameResources(&resources);
+
+    for (int i = 0; i < mazeHeight; i++)
+    {
+        if (maze->path[i] != NULL)
+        {
+            free(maze->path[i]);
+        }
+    }
+    if (maze->path != NULL) free(maze->path);
+    if (maze != NULL) free(maze);
+
+    // Re-initialize camera
+    camera = InitializeCamera();
+    
+    // Re-initialize maze
+    maze = InitializeMazeData(mazeHeight, mazeWidth);
+    if (maze == NULL)
+    {
+        fprintf(stderr, "Memory allocation failed for maze on restart.\n");
+        CloseWindow();
+        exit(EXIT_FAILURE);
+    }
+    
+    // Reload game resources
+    resources = LoadGameResources(maze, mazeHeight, mazeWidth);
+
+    // Reset player/game specific states if any (e.g., score, visited cells if not handled by maze re-init)
+    maze->cellsVisited = 0;
 }
 
 void CleanupGame(void)
@@ -98,50 +177,50 @@ void CleanupGame(void)
     // Cleanup resources
     CleanupResources(&resources, maze, mazeHeight);
     
-    // Clean up loaded sounds
+    unload_menu(&titleMenu);
+    UnloadPauseControls(&pauseMenu);
+
     UnloadStepSounds();     
-    CloseAudioDevice();
     UnloadBGM();
+    CloseAudioDevice();
 }
 
 static Maze* InitializeMazeData(int height, int width)
 {
-    Maze *maze = createMaze(height, width);
-    if (maze == NULL) return NULL;
+    Maze *newMaze = createMaze(height, width);
+    if (newMaze == NULL) return NULL;
     
-    InitializeMaze(maze, height, width);
+    InitializeMaze(newMaze, height, width);
     
-    maze->root.x = height - 1;
-    maze->root.y = width - 1;
+    newMaze->root.x = height - 1;
+    newMaze->root.y = width - 1;
     
-    srand((unsigned int)clock());
-    RandomizeMaze(maze, height, width, height * width * 10);
+    RandomizeMaze(newMaze, height, width, height * width * 10);
     
-    return maze;
+    newMaze->cellsVisited = 0;
+
+    return newMaze;
 }
 
-static void VisitCell(Maze *maze, int playerCellX, int playerCellY, GameResources *resources)
+static void VisitCell(Maze *mazeInstance, int playerCellX, int playerCellY, GameResources *res)
 {
-    // Ensure we're within bounds of the maze array
     if(playerCellX < 1 || playerCellY < 1 || 
-       playerCellX >= resources->cubicimage.width || 
-       playerCellY >= resources->cubicimage.height)
+       playerCellX >= res->cubicimage.width || 
+       playerCellY >= res->cubicimage.height)
         return;
     
-    // Convert from grid to maze coordinates, accounting for offset
     int mazeX = (playerCellX - 1) / 2;
     int mazeY = (playerCellY - 1) / 2;
     
-    // Ensure maze coordinates are valid
     if(mazeX < 0 || mazeY < 0 || 
-       mazeX >= MAZE_SIZE || mazeY >= MAZE_SIZE)
+       mazeX >= mazeWidth || mazeY >= mazeHeight)
         return;
     
-    if(!maze->path[mazeX][mazeY].visited)
+    if(!mazeInstance->path[mazeX][mazeY].visited)
     {
-        maze->path[mazeX][mazeY].visited = true;
-        maze->cellsVisited++;
-        RevealMinimap(maze, playerCellX, playerCellY, resources->cubicimage, &resources->minimap);
-        UpdateMinimapTexture(resources);
+        mazeInstance->path[mazeX][mazeY].visited = true;
+        mazeInstance->cellsVisited++;
+        RevealMinimap(mazeInstance, playerCellX, playerCellY, res->cubicimage, &res->minimap);
+        UpdateMinimapTexture(res);
     }
 }

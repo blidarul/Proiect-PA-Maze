@@ -11,10 +11,11 @@ void push(Node **top, const char *command)
 
 void pop(Node **top)
 {
-    if(*top)
+    if (*top != NULL)
     {
         Node *auxiliar = *top;
         *top = (*top)->next;
+        free(auxiliar);
     }
 }
 

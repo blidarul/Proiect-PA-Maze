@@ -4,10 +4,9 @@
 
 int main(void)
 {
-    Game *game;
-    InitGame(&game);
-    RunGameLoop(&game);
-    CleanupGame(&game);
+    InitGame();
+    RunGameLoop();
+    CleanupGame();
     
     return 0;
 }

@@ -1,5 +1,6 @@
 #include "title.h"
-#include<stdio.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 
 void initialize_menu(Menu *menu, int screen_width, int screen_height)

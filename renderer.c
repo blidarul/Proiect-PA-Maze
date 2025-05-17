@@ -33,7 +33,7 @@ void DrawMinimap(GameResources resources, int playerCellX, int playerCellY)
     DrawFPS(10, 10);
 }
 
-void RenderFrame(Camera camera, GameResources resources, Root root, int playerCellX, int playerCellY)
+void RenderFrame(Camera camera, GameResources resources, Root root, int playerCellX, int playerCellY, bool isPausedBackground)
 {
     BeginDrawing();
     
@@ -46,6 +46,11 @@ void RenderFrame(Camera camera, GameResources resources, Root root, int playerCe
     
     // Draw UI elements
     DrawMinimap(resources, playerCellX, playerCellY);
+
+    if (isPausedBackground) 
+    { 
+        DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.5f)); 
+    }
 
     EndDrawing();
 }

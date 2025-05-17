@@ -25,4 +25,4 @@ void RunGameLoop(void);
 // Clean up game resources
 void CleanupGame(void);
 
-#endif  GAME_H
+#endif

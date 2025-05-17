@@ -1,26 +1,31 @@
 #include "pause.h"
-#include<stdio.h>
+#include <stdio.h>
+#include "raylib.h"
+#include "sound.h"
 
-static void init_menu(Button *button, int x, int y, int width, int height, const char *label, Color bg, Color hover, Color text)
+static void InitPauseButton(PauseButton *button, int x, int y, int width, int height, const char *label, Color bg, Color hover, Color text)
 {
-    button->rect = (Rectangle) {x, y, width, height};
+    button->rect = (Rectangle){x, y, width, height};
     button->label = label;
     button->bg_color = bg;
     button->hover_color = hover;
-    button->text_color = text; 
+    button->text_color = text;
 }
 
-static void draw_button(const Button *button)
+static void DrawSinglePauseButton(const PauseButton *button)
 {
     Vector2 mouse = GetMousePosition();
+    Color col;
     bool hover = CheckCollisionPointRec(mouse, button->rect);
 
-    Color col;
     if (hover)
+    {
         col = button->hover_color;
+    }
     else
+    {
         col = button->bg_color;
-
+    }
     DrawRectangleRec(button->rect, col);
 
     int tw = MeasureText(button->label, 20);
@@ -31,117 +36,100 @@ static void draw_button(const Button *button)
              button->text_color);
 }
 
-static void init_slider(Slider *slider, int x, int y, int length, int thickness)
+static void InitPauseSlider(PauseSlider *slider, int x, int y, int length, int thickness)
 {
-    slider->bar = (Rectangle) {x, y, length, thickness};
-    slider->handle = (Rectangle){ x + length/2 - thickness, y - thickness/2, thickness*2, thickness*2 };
-    slider->volume_value = 0.5f;
+    slider->bar = (Rectangle){x, y, length, thickness};
+    slider->handle = (Rectangle){x + length * slider->volume_value - thickness/2, y - thickness/2 + thickness/2, thickness, thickness * 2};
     slider->dragging = false;
 }
 
-static void draw_slider(const Slider *slider)
+static void DrawSinglePauseSlider(const PauseSlider *slider)
 {
     DrawRectangleRec(slider->bar, LIGHTGRAY);
     DrawRectangleRec(slider->handle, DARKGRAY);
 }
 
-Menu_action init_pause(Pause_menu *menu, int screen_w, int screen_h)
+Menu_action InitializePauseControls(Pause_menu *menu, int screen_width, int screen_height)
 {
     menu->active = true;
-    menu->action = MENU_NONE;
+    menu->action = MENU_ACTION_NONE;
 
-    int cx = screen_w/2;
-    int cy = screen_h/2;
+    int cx = screen_width / 2;
+    int cy = screen_height / 2;
 
-    // butoane
-
-    InitButton(&menu->resume_button,  cx - 100, cy - 120, 200, 40,
-               "RESUME GAME", DARKBLUE, BLUE, WHITE);
-    InitButton(&menu->restart_button, cx - 100, cy - 60, 200, 40,
-               "RESTART LEVEL", DARKGRAY, GRAY, WHITE);
-    InitButton(&menu->exit_button,    cx - 100, cy + 0,   200, 40,
-               "EXIT", RED, MAROON, WHITE);
-
-    // slider pt volum
-    init_slider(&menu->volume_slider, cx - 100, cy + 80, 200, 10);
-
-    return MENU_NONE;
+    InitPauseButton(&menu->resume_button,  cx - 100, cy - 120, 200, 40, "RESUME", DARKGRAY, GRAY, WHITE);
+    InitPauseButton(&menu->restart_button, cx - 100, cy - 60,  200, 40, "RESTART", DARKGRAY, GRAY, WHITE);
+    InitPauseButton(&menu->exit_button,    cx - 100, cy + 0,   200, 40, "EXIT", DARKGRAY, GRAY, WHITE);
+    
+    menu->volume_slider.volume_value = GetCurrentMusicVolume();
+    InitPauseSlider(&menu->volume_slider, cx - 100, cy + 80, 200, 10);
+    
+    return menu->action;
 }
 
-Menu_action UpdatePauseMenu(Pause_menu *menu)
+Menu_action UpdatePauseControls(Pause_menu *menu)
 {
+    menu->action = MENU_ACTION_NONE;
     Vector2 mouse = GetMousePosition();
-    menu->action = MENU_NONE;
 
-    // resume
-    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) &&
-        CheckCollisionPointRec(mouse, menu->resume_button.rect))
+    // Resume button
+    if (CheckCollisionPointRec(mouse, menu->resume_button.rect) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
     {
-        menu->action = MENU_RESUME;
-        menu->active = false;
-        return menu->action;
+        menu->action = MENU_ACTION_RESUME;
     }
 
-    // restart
-    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) &&
-        CheckCollisionPointRec(mouse, menu->restart_button.rect))
+    // Restart button
+    if (CheckCollisionPointRec(mouse, menu->restart_button.rect) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
     {
-        menu->action = MENU_RESTART;
-        menu->active = false;
-        return menu->action;
+        menu->action = MENU_ACTION_RESTART;
+    }
+    
+    // Exit button
+    if (CheckCollisionPointRec(mouse, menu->exit_button.rect) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    {
+        menu->action = MENU_ACTION_EXIT;
     }
 
-    // exit
-    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) &&
-        CheckCollisionPointRec(mouse, menu->exit_button.rect))
-    {
-        menu->action = MENU_EXIT;
-        menu->active = false;
-        return menu->action;
-    }
-
-    // slider
-    Slider *sld = &menu->volume_slider;
+    // Slider logic
+    PauseSlider *sld = &menu->volume_slider;
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
         CheckCollisionPointRec(mouse, sld->handle))
     {
         sld->dragging = true;
     }
+
     if (sld->dragging)
     {
         float x = mouse.x;
         if (x < sld->bar.x) x = sld->bar.x;
         if (x > sld->bar.x + sld->bar.width) x = sld->bar.x + sld->bar.width;
+        
         sld->handle.x = x - sld->handle.width/2;
         sld->volume_value = (x - sld->bar.x) / sld->bar.width;
-        SetMasterVolume(sld->volume_value);
+        
+        SetCurrentMusicVolume(sld->volume_value);
     }
     if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) sld->dragging = false;
 
-    return MENU_NONE;
+    return menu->action;
 }
 
-void DrawPauseMenu(const Pause_menu *menu)
+void DrawPauseControls(const Pause_menu *menu)
 {
-    
-    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.5f));
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.7f));
 
+    DrawSinglePauseButton(&menu->resume_button);
+    DrawSinglePauseButton(&menu->restart_button);
+    DrawSinglePauseButton(&menu->exit_button);
     
-    const char *hdr = "MAIN MENU";
-    int hw = MeasureText(hdr, 30);
-    DrawText(hdr,
-             GetScreenWidth()/2 - hw/2,
-             GetScreenHeight()/2 - 180,
-             30, YELLOW);
+    DrawSinglePauseSlider(&menu->volume_slider);
 
-   
-    DrawButton(&menu->resume_button);
-    DrawButton(&menu->restart_button);
-    DrawButton(&menu->exit_button);
-    DrawSlider(&menu->volume_slider);
+    const char* pausedText = "PAUSED";
+    int pausedTextWidth = MeasureText(pausedText, 40);
+    DrawText(pausedText, GetScreenWidth()/2 - pausedTextWidth/2, GetScreenHeight()/2 - 200, 40, WHITE);
 }
 
-void UnloadPauseMenu(Pause_menu *menu)
+void UnloadPauseControls(Pause_menu *menu)
 {
     (void)menu;
 }
