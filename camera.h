@@ -13,6 +13,6 @@ Camera InitializeCamera(void);
 void UpdatePlayerMovement(Camera* camera, GameResources resources);
 
 // Handle player collisions with walls
-void HandleCollisions(Camera *camera, Vector3 *localMovement, GameResources resources);
+//void HandleCollisions(Camera *camera, Vector3 *localMovement, GameResources resources);
 
 #endif // CAMERA_H

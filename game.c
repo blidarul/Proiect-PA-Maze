@@ -65,8 +65,8 @@ void RunGameLoop(void)
 
                 // Calculate player position in grid
                 Vector2 playerPos = { camera.position.x, camera.position.z };
-                int playerCellX = (int)(playerPos.x - resources.mapPosition.x + 0.5f);
-                int playerCellY = (int)(playerPos.y - resources.mapPosition.z + 0.5f);
+                int playerCellX = (int)(playerPos.x);
+                int playerCellY = (int)(playerPos.y);
                     
                 // Handle bounds checking
                 playerCellX = Clamp(playerCellX, 0, resources.cubicmap.width - 1);

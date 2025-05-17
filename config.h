@@ -7,7 +7,7 @@
 
 // Game settings
 #define MAZE_SIZE 20
-#define PLAYER_RADIUS 0.1f
+#define PLAYER_RADIUS 0.2f
 
 // Mini-map settings
 #define MINIMAP_SCALE 5.0f
