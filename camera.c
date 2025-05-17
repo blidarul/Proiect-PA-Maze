@@ -228,6 +228,7 @@ void UpdatePlayerMovement(Camera* camera, GameResources resources)
     bool S = IsKeyDown(KEY_S);
     bool D = IsKeyDown(KEY_D);
     bool SHIFT = IsKeyDown(KEY_LEFT_SHIFT);
+    
     if(SHIFT) 
     {
         straightMovementSpeed*=PLAYER_ACCELERATION;
