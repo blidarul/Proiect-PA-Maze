@@ -68,89 +68,115 @@ bool PlayerCollides(Vector3 playerPos, GameResources resources)
     return collision;
 }
 
-void HandleCollisions(Camera *camera, Vector3 *localMovement, GameResources resources, Vector3 oldCamPos)
+Vector3 HandleCollisions(Camera *camera, Vector3 localMovement, GameResources resources)
 {
-    // Calculate position delta
-    Vector3 positionDelta =
-    {
-        camera->position.x - oldCamPos.x,
-        camera->position.y - oldCamPos.y,
-        camera->position.z - oldCamPos.z
+    // Store the original position
+    Vector3 originalPos = camera->position;
+    
+    // Convert camera-relative movement to world-space movement
+    // First, calculate forward and right vectors
+    Vector3 forward = Vector3Normalize(Vector3Subtract(camera->target, camera->position));
+    Vector3 right = Vector3Normalize(Vector3CrossProduct(forward, camera->up));
+    
+    Vector3 worldMovement = {
+        forward.x * localMovement.x + right.x * localMovement.y,
+        localMovement.z, // Keep vertical movement if any
+        forward.z * localMovement.x + right.z * localMovement.y
     };
-
-    // Increase precision for collision testing
-    const int numSteps = 5;
-    bool collision = false;
+    
+    // Simulate the new position
+    Vector3 targetPos = Vector3Add(originalPos, worldMovement);
+    
+    // Check if target position collides
+    if (!PlayerCollides(targetPos, resources))
+    {
+        // No collision, return the original movement
+        return localMovement;
+    }
+    
+    // We have a collision, determine the wall normal more accurately
     Vector2 wallNormal = {0};
-
-    Vector3 testPos = oldCamPos;
-
-    // Check intermediate positions for smoother collision detection
-    for (int step = 1; step <= numSteps && !collision; step++)
-    {
-        float t = (float)step / numSteps;
-        testPos.x = oldCamPos.x + positionDelta.x * t;
-        testPos.y = oldCamPos.y + positionDelta.y * t;
-        testPos.z = oldCamPos.z + positionDelta.z * t;
-
-        // Use PlayerCollides for collision detection
-        if (PlayerCollides(testPos, resources))
-        {
-            collision = true;
-
-            // Approximate wall normal (simple: direction of movement)
-            float dx = positionDelta.x;
-            float dz = positionDelta.z;
-            if (fabs(dx) > fabs(dz))
-            {
-                wallNormal.x = (dx > 0) ? 1.0f : -1.0f;
-                wallNormal.y = 0.0f;
-            }
-            else
-            {
-                wallNormal.x = 0.0f;
-                wallNormal.y = (dz > 0) ? 1.0f : -1.0f;
-            }
+    
+    // Test X-axis movement only
+    Vector3 xTestPos = originalPos;
+    xTestPos.x += worldMovement.x;
+    bool xCollision = PlayerCollides(xTestPos, resources);
+    
+    // Test Z-axis movement only
+    Vector3 zTestPos = originalPos;
+    zTestPos.z += worldMovement.z;
+    bool zCollision = PlayerCollides(zTestPos, resources);
+    
+    // Set wall normal based on which axis collides
+    if (xCollision && !zCollision) {
+        // Wall blocks X movement
+        wallNormal.x = (worldMovement.x > 0) ? -1.0f : 1.0f;
+        wallNormal.y = 0.0f;
+    }
+    else if (!xCollision && zCollision) {
+        // Wall blocks Z movement
+        wallNormal.x = 0.0f;
+        wallNormal.y = (worldMovement.z > 0) ? -1.0f : 1.0f;
+    }
+    else {
+        // Both axes collide or we have a corner case
+        // Use the dominant movement direction to determine primary blocking axis
+        if (fabs(worldMovement.x) > fabs(worldMovement.z)) {
+            wallNormal.x = (worldMovement.x > 0) ? -1.0f : 1.0f;
+            wallNormal.y = 0.0f;
+        }
+        else {
+            wallNormal.x = 0.0f;
+            wallNormal.y = (worldMovement.z > 0) ? -1.0f : 1.0f;
         }
     }
-
-    if (collision)
+    
+    // Handle collision response (sliding along walls)
+    Vector2 movement = {
+        worldMovement.x,
+        worldMovement.z
+    };
+    
+    float dotProduct = movement.x * wallNormal.x + movement.y * wallNormal.y;
+    
+    Vector2 perpendicular = {
+        wallNormal.x * dotProduct,
+        wallNormal.y * dotProduct
+    };
+    
+    Vector2 parallel = {
+        movement.x - perpendicular.x,
+        movement.y - perpendicular.y
+    };
+    
+    // Scale down the parallel component to prevent sliding into corners
+    const float slideScale = 0.8f;
+    parallel.x *= slideScale;
+    parallel.y *= slideScale;
+    
+    // Create the adjusted world movement
+    Vector3 adjustedWorldMovement = {
+        parallel.x,
+        worldMovement.y, // Keep vertical movement
+        parallel.y
+    };
+    
+    // Test if the adjusted movement is collision-free
+    Vector3 adjustedTargetPos = Vector3Add(originalPos, adjustedWorldMovement);
+    if (PlayerCollides(adjustedTargetPos, resources))
     {
-        // Handle collision response (sliding along walls, etc.)
-        Vector2 movement =
-        {
-            positionDelta.x,
-            positionDelta.z
-        };
-
-        float dotProduct = movement.x * wallNormal.x + movement.y * wallNormal.y;
-
-        Vector2 perpendicular =
-        {
-            wallNormal.x * dotProduct,
-            wallNormal.y * dotProduct
-        };
-
-        Vector2 parallel =
-        {
-            movement.x - perpendicular.x,
-            movement.y - perpendicular.y
-        };
-
-        // Reset position to old position
-        camera->position = oldCamPos;
-
-        // Apply the parallel movement (sliding along wall)
-        camera->position.x += parallel.x;
-        camera->position.z += parallel.y;
-
-        // Extra safety check - if our new position collides with any wall, retreat completely
-        Vector3 newPos = camera->position;
-        if (PlayerCollides(newPos, resources))
-        {
-            camera->position = oldCamPos;
-        }
+        // Still colliding, cancel movement in this direction
+        return (Vector3){0, 0, 0};
     }
+    
+    // Convert the world movement back to camera-relative coordinates
+    Vector3 result = {
+        Vector3DotProduct(forward, adjustedWorldMovement),
+        Vector3DotProduct(right, adjustedWorldMovement),
+        localMovement.z
+    };
+    
+    return result;
 }
 
 void UpdatePlayerMovement(Camera* camera, GameResources resources)
@@ -194,11 +220,9 @@ void UpdatePlayerMovement(Camera* camera, GameResources resources)
         else localMovement.y += straightMovementSpeed;
     }
     
-    Vector3 oldCamPos = camera->position;
-
-    // Update camera using the (potentially modified) localMovement and rotation
-    UpdateCameraPro(camera, localMovement, rotation, zoom);
-
     // Handle collision detection - modifies localMovement if necessary
-    HandleCollisions(camera, &localMovement, resources, oldCamPos);
+    localMovement = HandleCollisions(camera, localMovement, resources);
+    
+    // Update camera using the (potentially modified) localMovement
+    UpdateCameraPro(camera, localMovement, rotation, zoom);
 }
