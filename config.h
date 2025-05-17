@@ -20,6 +20,6 @@
 
 //sound related
 #define STEP_SOUND_COUNT 4
-#define STEP_COOLDOWN 1.0f / PLAYER_SPEED;
+#define STEP_COOLDOWN 1.0f / PLAYER_SPEED
 
 #endif // CONFIG_H
