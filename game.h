@@ -12,6 +12,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include "pause.h"
+#include "title.h"
+
 
 // Initialize the game
 void InitGame(void);
@@ -22,4 +25,4 @@ void RunGameLoop(void);
 // Clean up game resources
 void CleanupGame(void);
 
-#endif // GAME_H
+#endif  GAME_H

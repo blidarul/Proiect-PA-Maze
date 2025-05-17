@@ -1,28 +1,4 @@
-#include <stdio.h>
-#include<string.h>
-#include<stdlib.h>
-
-#define MAX 100
-
-typedef struct 
-{
-    int volume;  //volum ce variaza intre 0 si 10
-    int game_state;   //joc in desfasurare sau joc oprit
-}Game;
-
-
-typedef struct Option
-{
-    char option_name[MAX];
-    void (*command)(Game*);
-    struct Option *next;
-}Option;
-
-typedef struct Node
-{
-    char command[50];
-    struct Node *next;
-}Node;
+#include "menu.h"
 
 void push(Node **top, const char *command)
 {
@@ -153,27 +129,3 @@ void print_menu(Option *head, Game *state, Node **history)
         printf("Invalid option");
     }
 }
-
-int main()
-{
-    Option *menu = NULL;
-    Node *history = NULL;
-
-    int volume;
-
-    Game state = { .volume = 5, .game_state = 1};
-
-    add_option(&menu, "RESUME GAME", resume_game);
-    add_option(&menu, "RESTART GAME", restart_game);
-    add_option(&menu, "VOLUME", set_volume);
-    add_option(&menu, "EXIT GAME", exit_game);
-
-    while(state.game_state)
-        print_menu(menu, &state, &history);
-
-    print_history(history);
-
-    return 0;
-}
-
- 
