@@ -123,14 +123,25 @@ static Maze* InitializeMazeData(int height, int width)
 
 static void VisitCell(Maze *maze, int playerCellX, int playerCellY, GameResources *resources)
 {
-    // Convert from grid to maze coordinates for accessing path array
-    int mazeX = playerCellX / 2;
-    int mazeY = playerCellY / 2;
-
+    // Ensure we're within bounds of the maze array
+    if(playerCellX < 1 || playerCellY < 1 || 
+       playerCellX >= resources->cubicimage.width || 
+       playerCellY >= resources->cubicimage.height)
+        return;
+    
+    // Convert from grid to maze coordinates, accounting for offset
+    int mazeX = (playerCellX - 1) / 2;
+    int mazeY = (playerCellY - 1) / 2;
+    
+    // Ensure maze coordinates are valid
+    if(mazeX < 0 || mazeY < 0 || 
+       mazeX >= MAZE_SIZE || mazeY >= MAZE_SIZE)
+        return;
+    
     if(!maze->path[mazeX][mazeY].visited)
     {
         maze->path[mazeX][mazeY].visited = true;
-        maze->cellsVisited ++;
+        maze->cellsVisited++;
         RevealMinimap(maze, playerCellX, playerCellY, resources->cubicimage, &resources->minimap);
         UpdateMinimapTexture(resources);
     }
