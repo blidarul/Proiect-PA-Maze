@@ -29,7 +29,6 @@ bool PlayerCollides(Vector3 playerPos, GameResources resources)
 {
     int mapWidth = resources.cubicimage.width;
     int mapHeight = resources.cubicimage.height;
-    Color *pixels = LoadImageColors(resources.cubicimage);
 
     int minX = (int)floorf(playerPos.x - PLAYER_RADIUS);
     int maxX = (int)ceilf(playerPos.x + PLAYER_RADIUS);
@@ -46,7 +45,7 @@ bool PlayerCollides(Vector3 playerPos, GameResources resources)
     {
         for (int z = minZ; z <= maxZ; z++)
         {
-            Color pixel = pixels[z * mapWidth + x];
+            Color pixel = resources.mapPixels[z * mapWidth + x];
             if (pixel.r == 255)
             {
                 Rectangle cellRect = { x, z, 1.0f, 1.0f };
@@ -60,7 +59,6 @@ bool PlayerCollides(Vector3 playerPos, GameResources resources)
         }
         if (collision) break;
     }
-    UnloadImageColors(pixels);
 
     TraceLog(LOG_INFO, "[PlayerCollides] Pos:(%.2f,%.2f) Bounds:x[%d-%d] z[%d-%d] Result:%s",
         playerPos.x, playerPos.z, minX, maxX, minZ, maxZ, collision ? "COLLIDE" : "CLEAR");
