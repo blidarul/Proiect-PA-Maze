@@ -77,7 +77,8 @@ Vector3 HandleCollisions(Camera *camera, Vector3 localMovement, GameResources re
     Vector3 forward = Vector3Normalize(Vector3Subtract(camera->target, camera->position));
     Vector3 right = Vector3Normalize(Vector3CrossProduct(forward, camera->up));
     
-    Vector3 worldMovement = {
+    Vector3 worldMovement =
+    {
         forward.x * localMovement.x + right.x * localMovement.y,
         localMovement.z,
         forward.z * localMovement.x + right.z * localMovement.y
@@ -107,85 +108,73 @@ Vector3 HandleCollisions(Camera *camera, Vector3 localMovement, GameResources re
     bool zCollision = PlayerCollides(zTestPos, resources);
     
     // Set wall normal based on which axis collides
-    if (xCollision && !zCollision) {
-        // Wall blocks X movement
+    if (xCollision && !zCollision)
+    {
         wallNormal.x = (worldMovement.x > 0) ? -1.0f : 1.0f;
         wallNormal.y = 0.0f;
     }
-    else if (!xCollision && zCollision) {
-        // Wall blocks Z movement
+    else if (!xCollision && zCollision)
+    {
         wallNormal.x = 0.0f;
         wallNormal.y = (worldMovement.z > 0) ? -1.0f : 1.0f;
     }
-    else if (xCollision && zCollision) {
-        // Both axes collide - this is the challenging case for sliding
-        // Instead of just using the dominant direction, create a compound normal
-        // that better reflects the corner/edge collision
+    else if (xCollision && zCollision)
+    {
         wallNormal.x = (worldMovement.x > 0) ? -1.0f : 1.0f;
         wallNormal.y = (worldMovement.z > 0) ? -1.0f : 1.0f;
         
         // Normalize this diagonal normal
-        float len = sqrtf(wallNormal.x * wallNormal.x + wallNormal.y * wallNormal.y);
-        wallNormal.x /= len;
-        wallNormal.y /= len;
+        wallNormal = Vector2Normalize(wallNormal);
     }
-    else {
+    else
+    {
         // Strange case - targetPos collides but neither axis alone does
-        // Use the dominant movement direction
-        if (fabs(worldMovement.x) > fabs(worldMovement.z)) {
+        if (fabs(worldMovement.x) > fabs(worldMovement.z))
+        {
             wallNormal.x = (worldMovement.x > 0) ? -1.0f : 1.0f;
             wallNormal.y = 0.0f;
         }
-        else {
+        else
+        {
             wallNormal.x = 0.0f;
             wallNormal.y = (worldMovement.z > 0) ? -1.0f : 1.0f;
         }
     }
     
     // Handle collision response (sliding along walls)
-    Vector2 movement = {
-        worldMovement.x,
-        worldMovement.z
-    };
+    Vector2 movement = { worldMovement.x, worldMovement.z };
     
-    float dotProduct = movement.x * wallNormal.x + movement.y * wallNormal.y;
+    // Calculate dot product for projection
+    float dotProduct = Vector2DotProduct(movement, wallNormal);
     
     // Calculate perpendicular component (against the wall)
-    Vector2 perpendicular = {
-        wallNormal.x * dotProduct,
-        wallNormal.y * dotProduct
-    };
+    Vector2 perpendicular = Vector2Scale(wallNormal, dotProduct);
     
     // Calculate parallel component (along the wall)
-    Vector2 parallel = {
-        movement.x - perpendicular.x,
-        movement.y - perpendicular.y
-    };
+    Vector2 parallel = Vector2Subtract(movement, perpendicular);
     
     // Check if we have a meaningful parallel component
-    float parallelMagnitude = sqrtf(parallel.x * parallel.x + parallel.y * parallel.y);
+    float parallelMagnitude = Vector2Length(parallel);
     
-    if (parallelMagnitude < 0.001f) {
-        // Almost no parallel component, try to create a slide direction
-        // Pick a direction perpendicular to the wall normal
+    if (parallelMagnitude < 0.001f)
+    {
+        // Almost no parallel component, create a perpendicular slide direction
         parallel.x = -wallNormal.y;
         parallel.y = wallNormal.x;
         
-        // Scale it based on the original movement magnitude
-        float originalMagnitude = sqrtf(movement.x * movement.x + movement.y * movement.y);
-        float slideScale = 0.5f * originalMagnitude; // Half the original speed
-        parallel.x *= slideScale;
-        parallel.y *= slideScale;
+        // Scale based on original movement magnitude
+        float originalMagnitude = Vector2Length(movement);
+        parallel = Vector2Scale(parallel, 0.5f * originalMagnitude);
     }
-    else {
-        // We have a parallel component, scale it down to prevent sliding into corners
-        const float slideScale = 0.8f;
-        parallel.x *= slideScale;
-        parallel.y *= slideScale;
+    else
+    {
+        // Scale down parallel component to prevent sliding into corners
+        parallel = Vector2Scale(parallel, 0.8f);
     }
     
     // Create the adjusted world movement
-    Vector3 adjustedWorldMovement = {
+    Vector3 adjustedWorldMovement =
+    {
         parallel.x,
         worldMovement.y, // Keep vertical movement
         parallel.y
@@ -193,29 +182,29 @@ Vector3 HandleCollisions(Camera *camera, Vector3 localMovement, GameResources re
     
     // Test if the adjusted movement is collision-free
     Vector3 adjustedTargetPos = Vector3Add(originalPos, adjustedWorldMovement);
-    if (PlayerCollides(adjustedTargetPos, resources)) {
+    if (PlayerCollides(adjustedTargetPos, resources))
+    {
         // Try a smaller movement (half the magnitude)
-        adjustedWorldMovement.x *= 0.5f;
-        adjustedWorldMovement.z *= 0.5f;
+        adjustedWorldMovement = Vector3Scale(adjustedWorldMovement, 0.5f);
         
         adjustedTargetPos = Vector3Add(originalPos, adjustedWorldMovement);
-        if (PlayerCollides(adjustedTargetPos, resources)) {
-            // Still colliding, cancel movement
-            return (Vector3){0, 0, 0};
+        if (PlayerCollides(adjustedTargetPos, resources))
+        {
+            return Vector3Zero(); // Still colliding, cancel movement
         }
     }
     
     // Convert the world movement back to camera-relative coordinates
-    // We need to project the adjusted world movement onto the forward and right vectors
-    Vector3 result = {0};
+    Vector3 result;
     
-    // Project onto forward vector (x component in local space)
-    result.x = forward.x * adjustedWorldMovement.x + forward.z * adjustedWorldMovement.z;
+    // Create a 2D version of the adjusted movement for projection
+    Vector2 adjustedMovement2D = { adjustedWorldMovement.x, adjustedWorldMovement.z };
+    Vector2 forward2D = { forward.x, forward.z };
+    Vector2 right2D = { right.x, right.z };
     
-    // Project onto right vector (y component in local space)
-    result.y = right.x * adjustedWorldMovement.x + right.z * adjustedWorldMovement.z;
-    
-    // Keep vertical movement unchanged
+    // Project onto forward and right vectors
+    result.x = Vector2DotProduct(adjustedMovement2D, forward2D);
+    result.y = Vector2DotProduct(adjustedMovement2D, right2D);
     result.z = localMovement.z;
     
     return result;
