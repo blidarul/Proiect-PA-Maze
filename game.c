@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
-#include "raygui.h"
 
 // Private function prototypes
 static Maze* InitializeMazeData(int height, int width);
@@ -72,10 +71,8 @@ void RunGameLoop(void)
                 // Handle bounds checking
                 playerCellX = Clamp(playerCellX, 0, resources.cubicmap.width - 1);
                 playerCellY = Clamp(playerCellY, 0, resources.cubicmap.height - 1);
-                
-                // Handle collision detection
-                HandleCollisions(&camera, oldCamPos, oldCamTarget, resources, playerCellX, playerCellY);
-                
+                     
+
                 VisitCell(maze, playerCellX, playerCellY, &resources);
 
                 UpdateStepSounds();
