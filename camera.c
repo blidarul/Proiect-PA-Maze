@@ -2,13 +2,14 @@
 #include "raymath.h"
 #include <math.h>
 #include "raylib.h"
+#include "sound.h"
 
-int MAX(int a, int b)
+static inline int MAX(int a, int b)
 {
     return a > b ? a : b;
 }
 
-int MIN(int a, int b)
+static inline int MIN(int a, int b)
 {
     return a > b ? b : a;
 }
@@ -29,7 +30,6 @@ bool PlayerCollides(Vector3 playerPos, GameResources resources)
 {
     int mapWidth = resources.cubicimage.width;
     int mapHeight = resources.cubicimage.height;
-    Color *pixels = LoadImageColors(resources.cubicimage);
 
     int minX = (int)floorf(playerPos.x - PLAYER_RADIUS);
     int maxX = (int)ceilf(playerPos.x + PLAYER_RADIUS);
@@ -46,7 +46,7 @@ bool PlayerCollides(Vector3 playerPos, GameResources resources)
     {
         for (int z = minZ; z <= maxZ; z++)
         {
-            Color pixel = pixels[z * mapWidth + x];
+            Color pixel = resources.mapPixels[z * mapWidth + x];
             if (pixel.r == 255)
             {
                 Rectangle cellRect = { x, z, 1.0f, 1.0f };
@@ -60,11 +60,10 @@ bool PlayerCollides(Vector3 playerPos, GameResources resources)
         }
         if (collision) break;
     }
-    UnloadImageColors(pixels);
-
-    TraceLog(LOG_INFO, "[PlayerCollides] Pos:(%.2f,%.2f) Bounds:x[%d-%d] z[%d-%d] Result:%s",
-        playerPos.x, playerPos.z, minX, maxX, minZ, maxZ, collision ? "COLLIDE" : "CLEAR");
-
+    #ifdef DEBUG_COLLISIONS
+        TraceLog(LOG_INFO, "[PlayerCollides] Pos:(%.2f,%.2f) Bounds:x[%d-%d] z[%d-%d] Result:%s",
+            playerPos.x, playerPos.z, minX, maxX, minZ, maxZ, collision ? "COLLIDE" : "CLEAR");
+    #endif
     return collision;
 }
 
@@ -264,6 +263,11 @@ void UpdatePlayerMovement(Camera* camera, GameResources resources)
     
     // Handle collision detection - modifies localMovement if necessary
     localMovement = HandleCollisions(camera, localMovement, resources);
+
+    if(localMovement.x || localMovement.z)
+    {
+        UpdateStepSounds();
+    }
     
     // Update camera using the (potentially modified) localMovement
     UpdateCameraPro(camera, localMovement, rotation, zoom);
