@@ -74,8 +74,7 @@ void RunGameLoop(void)
                      
 
                 VisitCell(maze, playerCellX, playerCellY, &resources);
-
-                UpdateStepSounds();
+                
                 // Render the frame
                 RenderFrame(camera, resources, maze->root, playerCellX, playerCellY);
                 break;
@@ -116,7 +115,7 @@ static Maze* InitializeMazeData(int height, int width)
     maze->root.y = width - 1;
     
     srand((unsigned int)clock());
-    RandomizeMaze(maze, height, width, height * width * MAZE_SIZE);
+    RandomizeMaze(maze, height, width, height * width * 10);
     
     return maze;
 }

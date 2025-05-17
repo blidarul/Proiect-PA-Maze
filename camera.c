@@ -2,6 +2,7 @@
 #include "raymath.h"
 #include <math.h>
 #include "raylib.h"
+#include "sound.h"
 
 static inline int MAX(int a, int b)
 {
@@ -59,10 +60,10 @@ bool PlayerCollides(Vector3 playerPos, GameResources resources)
         }
         if (collision) break;
     }
-
-    TraceLog(LOG_INFO, "[PlayerCollides] Pos:(%.2f,%.2f) Bounds:x[%d-%d] z[%d-%d] Result:%s",
-        playerPos.x, playerPos.z, minX, maxX, minZ, maxZ, collision ? "COLLIDE" : "CLEAR");
-
+    #ifdef DEBUG_COLLISIONS
+        TraceLog(LOG_INFO, "[PlayerCollides] Pos:(%.2f,%.2f) Bounds:x[%d-%d] z[%d-%d] Result:%s",
+            playerPos.x, playerPos.z, minX, maxX, minZ, maxZ, collision ? "COLLIDE" : "CLEAR");
+    #endif
     return collision;
 }
 
@@ -262,6 +263,11 @@ void UpdatePlayerMovement(Camera* camera, GameResources resources)
     
     // Handle collision detection - modifies localMovement if necessary
     localMovement = HandleCollisions(camera, localMovement, resources);
+
+    if(localMovement.x || localMovement.z)
+    {
+        UpdateStepSounds();
+    }
     
     // Update camera using the (potentially modified) localMovement
     UpdateCameraPro(camera, localMovement, rotation, zoom);

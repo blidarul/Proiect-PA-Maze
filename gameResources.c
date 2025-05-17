@@ -49,11 +49,7 @@ void UnloadGameResources(GameResources* resources)
 
 void UpdateMinimapTexture(GameResources* resources)
 {
-    // Unload the previous texture first to prevent memory leak
-    UnloadTexture(resources->minimapTexture);
-    
-    // Load the updated texture
-    resources->minimapTexture = LoadTextureFromImage(resources->minimap);
+    UpdateTexture(resources->minimapTexture, resources->minimap.data);
 }
 
 void CleanupResources(GameResources* resources, Maze *maze, int height)
