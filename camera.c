@@ -16,10 +16,10 @@ int MIN(int a, int b)
 Camera InitializeCamera(void)
 {
     Camera camera = { 0 };
-    camera.position = (Vector3){ 1.5f, 0.4f, 1.5f };
-    camera.target = (Vector3){ 0.5f, 0.4f, 0.5f };
+    camera.position = (Vector3){ 1.5f, PLAYER_HEIGHT, 1.5f };
+    camera.target = (Vector3){ 0.5f, PLAYER_HEIGHT, 0.5f };
     camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
-    camera.fovy = 45.0f;
+    camera.fovy = PLAYER_FOV;
     camera.projection = CAMERA_PERSPECTIVE;
     return camera;
 }
@@ -227,26 +227,36 @@ void UpdatePlayerMovement(Camera* camera, GameResources resources)
     bool A = IsKeyDown(KEY_A);
     bool S = IsKeyDown(KEY_S);
     bool D = IsKeyDown(KEY_D);
+    bool SHIFT = IsKeyDown(KEY_LEFT_SHIFT);
+    if(SHIFT) 
+    {
+        straightMovementSpeed*=PLAYER_ACCELERATION;
+        diagonalMovementSpeed*=PLAYER_ACCELERATION;
+    }
 
     // Calculate camera-local movement based on input
     if (W)
     {
+    
         if (A || D) localMovement.x += diagonalMovementSpeed;
         else localMovement.x += straightMovementSpeed;
     }
     if (S) // Assuming S is backward
     {
+
         if (A || D) localMovement.x -= diagonalMovementSpeed;
         else localMovement.x -= straightMovementSpeed;
     }
 
     if (A)
     {
+
         if (W || S) localMovement.y -= diagonalMovementSpeed;
         else localMovement.y -= straightMovementSpeed;
     }
     if (D)
     {
+
         if (W || S) localMovement.y += diagonalMovementSpeed;
         else localMovement.y += straightMovementSpeed;
     }
