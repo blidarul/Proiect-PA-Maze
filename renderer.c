@@ -1,5 +1,8 @@
 #include "renderer.h"
+#define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
+#include "camera.h"
+
 void InitializeWindow(int width, int height, const char* title)
 {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
@@ -38,7 +41,7 @@ void RenderFrame(Camera camera, GameResources resources, Root root, int playerCe
     
     // Draw 3D scene
     BeginMode3D(camera);
-        DrawModel(resources.model, resources.mapPosition, 1.0f, WHITE);
+        DrawModel(resources.model, (Vector3) {0.5f, 0.0f, 0.5f}, 1.0f, WHITE);
     EndMode3D();
     
     // Draw UI elements

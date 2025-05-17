@@ -62,15 +62,13 @@ void RunGameLoop(void)
                 
             case GAME_STATE_GAMEPLAY:
                 // Update player movement
-                Vector3 oldCamPos = camera.position;
-                Vector3 oldCamTarget = camera.target;
-                UpdatePlayerMovement(&camera, &oldCamPos, &oldCamTarget);
-                
+                UpdatePlayerMovement(&camera, resources);
+
                 // Calculate player position in grid
                 Vector2 playerPos = { camera.position.x, camera.position.z };
-                int playerCellX = (int)(playerPos.x - resources.mapPosition.x + 0.5f);
-                int playerCellY = (int)(playerPos.y - resources.mapPosition.z + 0.5f);
-                
+                int playerCellX = (int)(playerPos.x);
+                int playerCellY = (int)(playerPos.y);
+                    
                 // Handle bounds checking
                 playerCellX = Clamp(playerCellX, 0, resources.cubicmap.width - 1);
                 playerCellY = Clamp(playerCellY, 0, resources.cubicmap.height - 1);
@@ -79,6 +77,7 @@ void RunGameLoop(void)
                 HandleCollisions(&camera, oldCamPos, oldCamTarget, resources, playerCellX, playerCellY);
                 
                 VisitCell(maze, playerCellX, playerCellY, &resources);
+
                 UpdateStepSounds();
                 // Render the frame
                 RenderFrame(camera, resources, maze->root, playerCellX, playerCellY);
