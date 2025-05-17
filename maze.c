@@ -1,16 +1,17 @@
 #include "maze.h"
 
-Cell **createMaze(int height, int width)
+Maze* createMaze(int height, int width)
 {
-    Cell **maze = (Cell **)malloc(height * sizeof(Cell *));
+    Maze *maze = (Maze *)malloc(sizeof(Maze));
+    maze->path = (Cell **)malloc(height * sizeof(Cell *));
     for (int i = 0; i < height; i++)
     {
-        maze[i] = (Cell *)malloc(width * sizeof(Cell));
+        maze->path[i] = (Cell *)malloc(width * sizeof(Cell));
         for (int j = 0; j < width; j++)
         {
-            maze[i][j].paths = 0;
-            maze[i][j].visited = false;
-            maze[i][j].onPath = false;
+            maze->path[i][j].paths = 0;
+            maze->path[i][j].visited = false;
+            maze->path[i][j].onPath = false;
         }
     }
     return maze;
@@ -34,86 +35,87 @@ int setDir(Cell *cell, unsigned int east, unsigned int north, unsigned int west,
     return 0;
 }
 
-static void RemoveOutgoingPath(Cell **path, int x, int y, int direction)
+static void RemoveOutgoingPath(Maze *maze, int x, int y, int direction)
 {
     unsigned int east, north, west, south;
-    getDir(path[x][y], &east, &north, &west, &south);
+    getDir(maze->path[x][y], &east, &north, &west, &south);
 
     switch (direction)
     {
     case EAST: // East
-        setDir(&path[x][y], NO_PATH, north, west, south);
-        getDir(path[x][y + 1], &east, &north, &west, &south);
-        setDir(&path[x][y + 1], east, north, NO_PATH, south);
+        setDir(&maze->path[x][y], NO_PATH, north, west, south);
+        getDir(maze->path[x][y + 1], &east, &north, &west, &south);
+        setDir(&maze->path[x][y + 1], east, north, NO_PATH, south);
         break;
     case NORTH: // North
-        setDir(&path[x][y], east, NO_PATH, west, south);
-        getDir(path[x - 1][y], &east, &north, &west, &south);
-        setDir(&path[x - 1][y], east, north, west, NO_PATH);
+        setDir(&maze->path[x][y], east, NO_PATH, west, south);
+        getDir(maze->path[x - 1][y], &east, &north, &west, &south);
+        setDir(&maze->path[x - 1][y], east, north, west, NO_PATH);
         break;
     case WEST: // West
-        setDir(&path[x][y], east, north, NO_PATH, south);
-        getDir(path[x][y - 1], &east, &north, &west, &south);
-        setDir(&path[x][y - 1], NO_PATH, north, west, south);
+        setDir(&maze->path[x][y], east, north, NO_PATH, south);
+        getDir(maze->path[x][y - 1], &east, &north, &west, &south);
+        setDir(&maze->path[x][y - 1], NO_PATH, north, west, south);
         break;
     case SOUTH: // South
-        setDir(&path[x][y], east, north, west, NO_PATH);
-        getDir(path[x + 1][y], &east, &north, &west, &south);
-        setDir(&path[x + 1][y], east, NO_PATH, west, south);
+        setDir(&maze->path[x][y], east, north, west, NO_PATH);
+        getDir(maze->path[x + 1][y], &east, &north, &west, &south);
+        setDir(&maze->path[x + 1][y], east, NO_PATH, west, south);
         break;
     }
 }
 
-void InitializeMaze(Cell **path, int mazeHeight, int mazeWidth)
+void InitializeMaze(Maze *maze, int mazeHeight, int mazeWidth)
 {
+    maze->cellsVisited = 0;
     for (int i = 0; i < mazeHeight; i++)
     {
         for (int j = 0; j < mazeWidth; j++)
         {
-            path[i][j].visited = false;
-            path[i][j].onPath = false;
+            maze->path[i][j].visited = false;
+            maze->path[i][j].onPath = false;
 
             if (j == 0)
             {
-                setDir(&path[i][j], OUTGOING_PATH, NO_PATH, NO_PATH, NO_PATH);
+                setDir(&maze->path[i][j], OUTGOING_PATH, NO_PATH, NO_PATH, NO_PATH);
             }
             else if (j < mazeWidth - 1)
             {
-                setDir(&path[i][j], OUTGOING_PATH, NO_PATH, INCOMING_PATH, NO_PATH);
+                setDir(&maze->path[i][j], OUTGOING_PATH, NO_PATH, INCOMING_PATH, NO_PATH);
             }
             else if (i == 0)
             {
-                setDir(&path[i][j], NO_PATH, NO_PATH, INCOMING_PATH, OUTGOING_PATH);
+                setDir(&maze->path[i][j], NO_PATH, NO_PATH, INCOMING_PATH, OUTGOING_PATH);
             }
             else if (i < mazeHeight - 1)
             {
-                setDir(&path[i][j], NO_PATH, INCOMING_PATH, INCOMING_PATH, OUTGOING_PATH);
+                setDir(&maze->path[i][j], NO_PATH, INCOMING_PATH, INCOMING_PATH, OUTGOING_PATH);
             }
             else
             {
-                setDir(&path[i][j], NO_PATH, INCOMING_PATH, INCOMING_PATH, NO_PATH);
+                setDir(&maze->path[i][j], NO_PATH, INCOMING_PATH, INCOMING_PATH, NO_PATH);
             }
         }
     }
 }
 
 // Randomize maze
-void RandomizeMaze(Cell **path, int height, int width, Root *root, long long count)
+void RandomizeMaze(Maze *maze, int height, int width, long long count)
 {
     long long i = 0;
     while (i < count)
     {
         unsigned int east, north, west, south;
-        getDir(path[root->x][root->y], &east, &north, &west, &south);
+        getDir(maze->path[maze->root.x][maze->root.y], &east, &north, &west, &south);
         // stores the possible directions to go
         int choices[4] = {1, 1, 1, 1};
-        if (root->x == height - 1)
+        if (maze->root.x == height - 1)
             choices[3] = 0;
-        if (root->x == 0)
+        if (maze->root.x == 0)
             choices[1] = 0;
-        if (root->y == 0)
+        if (maze->root.y == 0)
             choices[2] = 0;
-        if (root->y == width - 1)
+        if (maze->root.y == width - 1)
             choices[0] = 0;
         // picks a valid direction
         int random = rand() % 4;
@@ -126,63 +128,63 @@ void RandomizeMaze(Cell **path, int height, int width, Root *root, long long cou
         {
         case EAST: // picked east
             // make an outgoing path east
-            setDir(&path[root->x][root->y], OUTGOING_PATH, north, west, south);
+            setDir(&maze->path[maze->root.x][maze->root.y], OUTGOING_PATH, north, west, south);
             // change the new root to be east of the old one
-            root->y++;
+            maze->root.y++;
             // replace west path from the new root with an incoming path
-            getDir(path[root->x][root->y], &east, &north, &west, &south);
-            setDir(&path[root->x][root->y], east, north, INCOMING_PATH, south);
+            getDir(maze->path[maze->root.x][maze->root.y], &east, &north, &west, &south);
+            setDir(&maze->path[maze->root.x][maze->root.y], east, north, INCOMING_PATH, south);
             break;
         case NORTH: // picked north
-            setDir(&path[root->x][root->y], east, OUTGOING_PATH, west, south);
+            setDir(&maze->path[maze->root.x][maze->root.y], east, OUTGOING_PATH, west, south);
             // change the new root to be north of the old one
-            root->x--;
+            maze->root.x--;
             // replace south path from the new root with an incoming path
-            getDir(path[root->x][root->y], &east, &north, &west, &south);
-            setDir(&path[root->x][root->y], east, north, west, INCOMING_PATH);
+            getDir(maze->path[maze->root.x][maze->root.y], &east, &north, &west, &south);
+            setDir(&maze->path[maze->root.x][maze->root.y], east, north, west, INCOMING_PATH);
             break;
         case WEST: // picked west
-            setDir(&path[root->x][root->y], east, north, OUTGOING_PATH, south);
+            setDir(&maze->path[maze->root.x][maze->root.y], east, north, OUTGOING_PATH, south);
             // change the new root to be west of the old one
-            root->y--;
+            maze->root.y--;
             // replace east path from the new root with an incoming path
-            getDir(path[root->x][root->y], &east, &north, &west, &south);
-            setDir(&path[root->x][root->y], INCOMING_PATH, north, west, south);
+            getDir(maze->path[maze->root.x][maze->root.y], &east, &north, &west, &south);
+            setDir(&maze->path[maze->root.x][maze->root.y], INCOMING_PATH, north, west, south);
             break;
         case SOUTH: // picked south
-            setDir(&path[root->x][root->y], east, north, west, OUTGOING_PATH);
+            setDir(&maze->path[maze->root.x][maze->root.y], east, north, west, OUTGOING_PATH);
             // change the new root to be south of the old one
-            root->x++;
+            maze->root.x++;
             // replace north path from the new root with an incoming path
-            getDir(path[root->x][root->y], &east, &north, &west, &south);
-            setDir(&path[root->x][root->y], east, INCOMING_PATH, west, south);
+            getDir(maze->path[maze->root.x][maze->root.y], &east, &north, &west, &south);
+            setDir(&maze->path[maze->root.x][maze->root.y], east, INCOMING_PATH, west, south);
             break;
         default:
             break;
         }
 
-        getDir(path[root->x][root->y], &east, &north, &west, &south);
+        getDir(maze->path[maze->root.x][maze->root.y], &east, &north, &west, &south);
         if (east == OUTGOING_PATH)
         {
-            RemoveOutgoingPath(path, root->x, root->y, EAST);
+            RemoveOutgoingPath(maze, maze->root.x, maze->root.y, EAST);
         }
         else if (north == OUTGOING_PATH)
         {
-            RemoveOutgoingPath(path, root->x, root->y, NORTH);
+            RemoveOutgoingPath(maze, maze->root.x, maze->root.y, NORTH);
         }
         else if (west == OUTGOING_PATH)
         {
-            RemoveOutgoingPath(path, root->x, root->y, WEST);
+            RemoveOutgoingPath(maze, maze->root.x, maze->root.y, WEST);
         }
         else if (south == OUTGOING_PATH)
         {
-            RemoveOutgoingPath(path, root->x, root->y, SOUTH);
+            RemoveOutgoingPath(maze, maze->root.x, maze->root.y, SOUTH);
         }
         i++;
     }
 }
 
-Image ConvertMazeToCubicMap(Cell **path, int height, int width)
+Image ConvertMazeToCubicMap(Maze *maze, int height, int width)
 {
     // Create an image with dimensions 2*width+1 x 2*height+1
     // This gives us 1 pixel per cell and 1 pixel per wall
@@ -198,7 +200,7 @@ Image ConvertMazeToCubicMap(Cell **path, int height, int width)
         for (int j = 0; j < width; j++)
         {
             unsigned int east, north, west, south;
-            getDir(path[i][j], &east, &north, &west, &south);
+            getDir(maze->path[i][j], &east, &north, &west, &south);
             
             // Calculate the cell's pixel position (cells are at even coordinates)
             int cellX = j * 2 + 1;
@@ -232,31 +234,30 @@ Image ConvertMazeToCubicMap(Cell **path, int height, int width)
     return cubicmap;
 }
 
-void RevealMinimap(Cell **path, int playerCellX, int playerCellY, Image cubicmap, Image *minimap)
+void RevealMinimap(Maze *maze, int playerCellX, int playerCellY, Image cubicmap, Image *minimap)
 {
-    // Convert from grid to maze coordinates for accessing path array
-    int mazeX = playerCellX / 2;
-    int mazeY = playerCellY / 2;
+    // Use grid coordinates directly for image operations
+    int cellX = playerCellX;
+    int cellY = playerCellY;
     
-    if(!path[mazeX][mazeY].visited)
+    for(int i = -1; i <= 1; i++)
+    for(int j = -1; j <= 1; j++)
     {
-        // Use grid coordinates directly for image operations
-        int cellX = playerCellX;
-        int cellY = playerCellY;
-
-        path[mazeX][mazeY].visited = true;
+        int checkX = cellX + i;
+        int checkY = cellY + j;
         
-        for(int i = -1; i <= 1; i++)
-        for(int j = -1; j <= 1; j++)
+        // Check bounds before accessing
+        if(checkX >= 0 && checkX < cubicmap.width && 
+           checkY >= 0 && checkY < cubicmap.height)
         {
-            if(GetImageColor(cubicmap, cellX + i, cellY + j).r == 0)
+            if(GetImageColor(cubicmap, checkX, checkY).r == 0)
             {
-                ImageDrawPixel(minimap, cellX + i, cellY + j, WHITE);
+                ImageDrawPixel(minimap, checkX, checkY, WHITE);
             }
             else
             {
-                ImageDrawPixel(minimap, cellX + i, cellY + j, BLACK);
+                ImageDrawPixel(minimap, checkX, checkY, BLACK);
             }
         }
-    }
+    }  
 }

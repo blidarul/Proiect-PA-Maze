@@ -5,6 +5,7 @@ typedef enum {
     GAME_STATE_TITLE,
     GAME_STATE_GAMEPLAY,
     GAME_STATE_PAUSE,
+    GAME_STATE_QUESTION
 } GameState;
 
 // Get current game state

@@ -1,0 +1,60 @@
+1. What is the primary purpose of accessibility incorporation in digital content?
+2. Which of the four key principles of accessible design emphasizes the need for users to be able to operate user interfaces and navigate content using a variety of input methods?
+3. Which of the following is a recommended practice for ensuring that digital content is compatible with a wide range of assistive technologies?
+4. The primary purpose of alternative text for images is to:
+5. Which of the following colour contrast ratios is recommended for text and background to ensure readability for users with low vision?
+6. What kind of testing is crucial after developing an accessible website?
+7. What does the term 'user experience' encompass in accessible web design?
+8. Which of the following tools can be used ascolour contrast checker website?
+9. The primary goal of an accessibility review is to:
+10. What is the purpose of an accessibility awareness campaign?
+11. When modifying form inputs to be more accessible, what is a crucial feature to add?
+12. What kind of testing is important after implementing new accessibility features?
+13. Why are alternative texts for images important?
+14. Which can be a necessary step to optimize digital content for accessibility compliance:
+15. Which of the following tools is commonly used for conducting accessibility audits of digital content?
+16. How can interactivity be maintained for users with limited mobility when designing web content?
+17. Why is it important to test accessible digital content with assistive technologies?
+18. Which of the following is an essential step in integrating accessibility considerations into the content creation process?
+19. What is the purpose of providing clear and concise language in accessible digital content?
+20. What is the role of high color contrast in accessible digital content?
+21. Which of the following is the primary objective of applying user-centered design principles throughout the development of an accessible prototype?
+22. How can emerging tools and technologies, such as AI-powered tools, adaptive design features, and personalized accessibility options, enhance the accessibility of a digital prototype?
+23. What is the role of incorporating innovative accessibility solutions for multimedia elements in a digital prototype?
+24. What can be the main purpose for following the principles of inclusive design?
+25. Which innovative methods are emerging to make multimedia content accessible to a wider audience?
+26. How does AI contribute to web accessibility?
+27. Why is it crucial to test the accessibility of a prototype with users with disabilities?
+28. What's at the heart of innovative accessibility integration?
+29. What is the purpose of providing constructive recommendations in an accessibility evaluation report?
+30. Which of the following is an essential step in refining an accessible prototype based on user feedback?
+31. What are the three VR headsets you chose to research?
+32. What are some of the factors to consider when choosing a VR headset?
+33. What are some of the latest trends in VR headset development?
+34. What is your overall impression of the VR headset market and its future potential?
+35. What is one of the key challenges that VR headset manufacturers face in terms of increasing the field of view (FOV) of their devices?
+36. Which of the following is NOT a common application for VR systems?
+37. Which of the following is NOT a common application for MR systems?
+38. Which of the following is the MOST important factor to consider when choosing a VR headset?
+39. How do you think VR headsets can be used to enhance educational experiences and make learning more engaging?
+40. Which of the following statements is the MOST accurate prediction about the future of VR, AR, and MR systems?
+41. Which of the following is NOT an example of modifying a VR, AR, or MR experience?
+42. What is the most important thing to consider when modifying a VR, AR, or MR experience?
+43. Which of the following is NOT an example of refining a VR, AR, or MR experience?
+44. What is the most important thing to consider when refining a VR, AR, or MR experience?
+45. Which of the following is NOT an example of improving a VR, AR, or MR experience?
+46. What is the most important thing to consider when improving a VR, AR, or MR experience?
+47. Which of the following is NOT an example of integrating VR, AR, and MR experiences?
+48. What is the difference between modification and refinement in the context of VR, AR, and MR development?
+49. Which of the following is NOT a challenge of integrating VR, AR, and MR?
+50. Which of the following is NOT an opportunity of integrating VR, AR, and MR?
+51. Which tool is commonly used for developing Virtual Reality experiences?
+52. Which of the following best describes Mixed Reality (MR)?
+53. What is the primary component for user immersion in VR?
+54. What ethical aspect is crucial in VR/AR/MR development?
+55. Which language is commonly used for VR programming?
+56. What is the main goal of integrating elements across VR, AR, and MR platforms?
+57. What does VR provide that AR doesn't?
+58. What is the key challenge in MR integration?
+59. Which aspects of the art pieces should be emphasized in the VR experience to create an immersive and engaging experience for users?
+60. What is one of the ethical considerations when creating a VR experience?
