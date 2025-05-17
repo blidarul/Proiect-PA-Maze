@@ -17,9 +17,12 @@
 //movement related
 #define DEFAULT_MOUSE_SENSITIVITY 0.1f
 #define PLAYER_SPEED 2.0f
+#define PLAYER_ACCELERATION 1.8f //For sprinting 
+#define PLAYER_FOV 65.0f
+#define PLAYER_HEIGHT 0.5f
 
 //sound related
 #define STEP_SOUND_COUNT 4
-#define STEP_COOLDOWN 1.0f / PLAYER_SPEED;
+#define STEP_COOLDOWN 1.0f / PLAYER_SPEED
 
 #endif // CONFIG_H

@@ -130,6 +130,7 @@ static void VisitCell(Maze *maze, int playerCellX, int playerCellY, GameResource
     {
         maze->path[mazeX][mazeY].visited = true;
         maze->cellsVisited++;
+        maze->cellsVisited++;
         RevealMinimap(maze, playerCellX, playerCellY, resources->cubicimage, &resources->minimap);
         UpdateMinimapTexture(resources);
     }

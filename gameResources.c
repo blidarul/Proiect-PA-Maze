@@ -16,24 +16,13 @@ GameResources LoadGameResources(Maze *maze, int height, int width)
         return resources; // Return empty resources
     }
     
-    // Debug exports
-    if (!ExportImage(resources.cubicimage, "resources/cubicmap.png")) 
-    {
-        fprintf(stderr, "Warning: Failed to export cubicmap.png\n");
-    }
-    
-    if (!ExportImage(resources.minimap, "resources/minimap.png"))
-    {
-        fprintf(stderr, "Warning: Failed to export minimap.png\n");
-    }
-    
     // Load textures
     resources.cubicmap = LoadTextureFromImage(resources.cubicimage);
     resources.minimapTexture = LoadTextureFromImage(resources.minimap);
     resources.mesh = GenMeshCubicmap(resources.cubicimage, (Vector3){ 1.0f, 1.0f, 1.0f });
     resources.model = LoadModelFromMesh(resources.mesh);
     
-    resources.texture = LoadTexture("resources/cubicmap_atlas.png");
+    resources.texture = LoadTexture("resources/textures/cubicmap_atlas.png");
     if (resources.texture.id == 0)
     {
         fprintf(stderr, "Failed to load cubicmap_atlas.png\n");

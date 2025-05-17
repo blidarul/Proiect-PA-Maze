@@ -243,13 +243,21 @@ void RevealMinimap(Maze *maze, int playerCellX, int playerCellY, Image cubicmap,
     for(int i = -1; i <= 1; i++)
     for(int j = -1; j <= 1; j++)
     {
-        if(GetImageColor(cubicmap, cellX + i, cellY + j).r == 0)
+        int checkX = cellX + i;
+        int checkY = cellY + j;
+        
+        // Check bounds before accessing
+        if(checkX >= 0 && checkX < cubicmap.width && 
+           checkY >= 0 && checkY < cubicmap.height)
         {
-            ImageDrawPixel(minimap, cellX + i, cellY + j, WHITE);
-        }
-        else
-        {
-            ImageDrawPixel(minimap, cellX + i, cellY + j, BLACK);
+            if(GetImageColor(cubicmap, checkX, checkY).r == 0)
+            {
+                ImageDrawPixel(minimap, checkX, checkY, WHITE);
+            }
+            else
+            {
+                ImageDrawPixel(minimap, checkX, checkY, BLACK);
+            }
         }
     }  
 }
