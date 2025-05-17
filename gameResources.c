@@ -1,10 +1,11 @@
 #include "gameResources.h"
 #include <stdio.h>
-#include <string.h>
+
 
 GameResources LoadGameResources(Maze *maze, int height, int width)
 {
     GameResources resources = { 0 };
+    LoadQuestions(resources.questions);
     resources.minimap = GenImageColor(width * 2 + 1, height * 2 + 1, DARKGRAY);
     // Generate images
     resources.cubicimage = ConvertMazeToCubicMap(maze, height, width);

@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
-#define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
 // Private function prototypes
@@ -78,7 +77,7 @@ void RunGameLoop(void)
                 
                 // Handle collision detection
                 HandleCollisions(&camera, oldCamPos, oldCamTarget, resources, playerCellX, playerCellY);
-
+                
                 VisitCell(maze, playerCellX, playerCellY, &resources);
                 UpdateStepSounds();
                 // Render the frame
