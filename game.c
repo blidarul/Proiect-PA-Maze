@@ -53,7 +53,7 @@ void RunGameLoop(void)
 {
     // Main game loop
     while (!WindowShouldClose())
-    {
+    {   
         switch (GetGameState())
         {
         case GAME_STATE_TITLE:
@@ -76,8 +76,8 @@ void RunGameLoop(void)
             VisitCell(maze, playerCellX, playerCellY, &resources);
             UpdateStepSounds();
             // Render the frame
-
-            RenderFrame(camera, resources, maze->root, playerCellX, playerCellY);
+            
+            RenderFrame(camera, resources, maze->root, playerCellX, playerCellY, maze->cellsVisited);
             break;
 
         case GAME_STATE_PAUSE:
