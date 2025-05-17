@@ -3,12 +3,12 @@
 #include <math.h>
 #include "raylib.h"
 
-int MAX(int a, int b)
+static inline int MAX(int a, int b)
 {
     return a > b ? a : b;
 }
 
-int MIN(int a, int b)
+static inline int MIN(int a, int b)
 {
     return a > b ? b : a;
 }
