@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include "raylib.h"
 
-
-
 static Sound steps[STEP_SOUND_COUNT];
 static float stepTimer = 0.0f;
 static int currentStep = 0;

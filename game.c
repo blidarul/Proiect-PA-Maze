@@ -61,23 +61,20 @@ void RunGameLoop(void)
                 
             case GAME_STATE_GAMEPLAY:
                 // Update player movement
-                Vector3 oldCamPos = camera.position;
-                Vector3 oldCamTarget = camera.target;
-                UpdatePlayerMovement(&camera, &oldCamPos, &oldCamTarget);
-                
+                UpdatePlayerMovement(&camera, resources);
+
                 // Calculate player position in grid
                 Vector2 playerPos = { camera.position.x, camera.position.z };
-                int playerCellX = (int)(playerPos.x - resources.mapPosition.x + 0.5f);
-                int playerCellY = (int)(playerPos.y - resources.mapPosition.z + 0.5f);
-                
+                int playerCellX = (int)(playerPos.x);
+                int playerCellY = (int)(playerPos.y);
+                    
                 // Handle bounds checking
                 playerCellX = Clamp(playerCellX, 0, resources.cubicmap.width - 1);
                 playerCellY = Clamp(playerCellY, 0, resources.cubicmap.height - 1);
-                
-                // Handle collision detection
-                HandleCollisions(&camera, oldCamPos, oldCamTarget, resources, playerCellX, playerCellY);
+                     
 
                 VisitCell(maze, playerCellX, playerCellY, &resources);
+
                 UpdateStepSounds();
                 // Render the frame
                 RenderFrame(camera, resources, maze->root, playerCellX, playerCellY);
@@ -85,6 +82,9 @@ void RunGameLoop(void)
                 
             case GAME_STATE_PAUSE:
                 // Handle pause state
+                break;
+            case GAME_STATE_QUESTION:
+                
                 break;
 
         }
@@ -123,14 +123,25 @@ static Maze* InitializeMazeData(int height, int width)
 
 static void VisitCell(Maze *maze, int playerCellX, int playerCellY, GameResources *resources)
 {
-    // Convert from grid to maze coordinates for accessing path array
-    int mazeX = playerCellX / 2;
-    int mazeY = playerCellY / 2;
-
+    // Ensure we're within bounds of the maze array
+    if(playerCellX < 1 || playerCellY < 1 || 
+       playerCellX >= resources->cubicimage.width || 
+       playerCellY >= resources->cubicimage.height)
+        return;
+    
+    // Convert from grid to maze coordinates, accounting for offset
+    int mazeX = (playerCellX - 1) / 2;
+    int mazeY = (playerCellY - 1) / 2;
+    
+    // Ensure maze coordinates are valid
+    if(mazeX < 0 || mazeY < 0 || 
+       mazeX >= MAZE_SIZE || mazeY >= MAZE_SIZE)
+        return;
+    
     if(!maze->path[mazeX][mazeY].visited)
     {
         maze->path[mazeX][mazeY].visited = true;
-        maze->cellsVisited ++;
+        maze->cellsVisited++;
         RevealMinimap(maze, playerCellX, playerCellY, resources->cubicimage, &resources->minimap);
         UpdateMinimapTexture(resources);
     }

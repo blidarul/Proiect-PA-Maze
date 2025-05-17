@@ -13,7 +13,6 @@ typedef struct
     Texture2D cubicmap;
     Texture2D minimapTexture;
     Color *mapPixels;
-    Vector3 mapPosition;
     Image minimap;
     Image cubicimage;
 } GameResources;

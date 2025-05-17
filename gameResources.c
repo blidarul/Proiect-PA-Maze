@@ -43,8 +43,6 @@ GameResources LoadGameResources(Maze *maze, int height, int width)
     // Load collision data
     resources.mapPixels = LoadImageColors(resources.cubicimage);
     
-    resources.mapPosition = (Vector3){ -1.0f, 0.0f, -1.0f };
-    
     return resources;
 }
 

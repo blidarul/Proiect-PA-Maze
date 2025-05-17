@@ -1,174 +1,259 @@
 #include "camera.h"
 #include "raymath.h"
 #include <math.h>
+#include "raylib.h"
+
+int MAX(int a, int b)
+{
+    return a > b ? a : b;
+}
+
+int MIN(int a, int b)
+{
+    return a > b ? b : a;
+}
 
 Camera InitializeCamera(void)
 {
     Camera camera = { 0 };
-    camera.position = (Vector3){ 0.2f, 0.4f, 0.2f };
-    camera.target = (Vector3){ 0.2f, 0.4f, 0.0f };
+    camera.position = (Vector3){ 1.5f, 0.4f, 1.5f };
+    camera.target = (Vector3){ 0.5f, 0.4f, 0.5f };
     camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
     camera.fovy = 45.0f;
     camera.projection = CAMERA_PERSPECTIVE;
     return camera;
 }
 
-void UpdatePlayerMovement(Camera* camera, Vector3* oldCamPos, Vector3* oldCamTarget)
+// Helper: returns true if player collides with any wall
+bool PlayerCollides(Vector3 playerPos, GameResources resources)
 {
-    // Store current position and target
-    *oldCamPos = camera->position;
-    *oldCamTarget = camera->target;
-    
-    // Update camera (handles input)
-    UpdateCamera(camera, CAMERA_FIRST_PERSON);
-}
+    int mapWidth = resources.cubicimage.width;
+    int mapHeight = resources.cubicimage.height;
+    Color *pixels = LoadImageColors(resources.cubicimage);
 
-void HandleCollisions(Camera* camera, Vector3 oldCamPos, Vector3 oldCamTarget, 
-                     GameResources resources, int playerCellX, int playerCellY)
-{
-    // Calculate position delta
-    Vector3 positionDelta = {
-        camera->position.x - oldCamPos.x,
-        camera->position.y - oldCamPos.y,
-        camera->position.z - oldCamPos.z
-    };
-    
-    // Calculate direction change separately
-    Vector3 oldDirection = {
-        oldCamTarget.x - oldCamPos.x,
-        oldCamTarget.y - oldCamPos.y,
-        oldCamTarget.z - oldCamPos.z
-    };
-    
-    Vector3 newDirection = {
-        camera->target.x - camera->position.x,
-        camera->target.y - camera->position.y,
-        camera->target.z - camera->position.z
-    };
-    
-    // Increase precision for collision testing
-    const int numSteps = 5;
+    int minX = (int)floorf(playerPos.x - PLAYER_RADIUS);
+    int maxX = (int)ceilf(playerPos.x + PLAYER_RADIUS);
+    int minZ = (int)floorf(playerPos.z - PLAYER_RADIUS);
+    int maxZ = (int)ceilf(playerPos.z + PLAYER_RADIUS);
+
+    minX = (minX < 0) ? 0 : minX;
+    minZ = (minZ < 0) ? 0 : minZ;
+    maxX = (maxX >= mapWidth) ? mapWidth - 1 : maxX;
+    maxZ = (maxZ >= mapHeight) ? mapHeight - 1 : maxZ;
+
     bool collision = false;
-    Vector2 wallNormal = {0};
-    
-    // Check intermediate positions for smoother collision detection
-    for (int step = 1; step <= numSteps && !collision; step++) {
-        // Test at intermediate positions
-        float t = (float)step / numSteps;
-        Vector3 testPos = {
-            oldCamPos.x + positionDelta.x * t,
-            oldCamPos.y + positionDelta.y * t, 
-            oldCamPos.z + positionDelta.z * t
-        };
-        
-        Vector2 playerPos = { testPos.x, testPos.z };
-        
-        // Slightly larger radius to prevent slipping through walls
-        const float extendedRadius = PLAYER_RADIUS * 1.2f;
-        
-        // Check surrounding cells in a wider area
-        for (int y = playerCellY - 3; y <= playerCellY + 3 && y < resources.cubicmap.height && !collision; y++) {
-            for (int x = playerCellX - 3; x <= playerCellX + 3 && x < resources.cubicmap.width && !collision; x++) {
-                if (y < 0 || x < 0) continue;
-                
-                if ((resources.mapPixels[y*resources.cubicmap.width + x].r == 255) &&
-                    (CheckCollisionCircleRec(playerPos, extendedRadius,
-                    (Rectangle){ resources.mapPosition.x - 0.5f + x*1.0f, 
-                                resources.mapPosition.z - 0.5f + y*1.0f, 1.0f, 1.0f })))
+    for (int x = minX; x <= maxX; x++)
+    {
+        for (int z = minZ; z <= maxZ; z++)
+        {
+            Color pixel = pixels[z * mapWidth + x];
+            if (pixel.r == 255)
+            {
+                Rectangle cellRect = { x, z, 1.0f, 1.0f };
+                Vector2 playerPos2D = { playerPos.x, playerPos.z };
+                if (CheckCollisionCircleRec(playerPos2D, PLAYER_RADIUS, cellRect))
                 {
                     collision = true;
-                    
-                    // Calculate wall normal
-                    float wallCenterX = resources.mapPosition.x - 0.5f + x*1.0f + 0.5f;
-                    float wallCenterZ = resources.mapPosition.z - 0.5f + y*1.0f + 0.5f;
-                    
-                    float dx = playerPos.x - wallCenterX;
-                    float dz = playerPos.y - wallCenterZ;
-                    
-                    if (fabs(dx) > fabs(dz)) {
-                        wallNormal.x = (dx > 0) ? 1.0f : -1.0f;
-                        wallNormal.y = 0.0f;
-                    } else {
-                        wallNormal.x = 0.0f;
-                        wallNormal.y = (dz > 0) ? 1.0f : -1.0f;
-                    }
-                }
-            }
-        }
-    }
-    
-    if (collision)
-    {
-        // Handle collision response (sliding along walls, etc.)
-        // ...existing collision handling code...
-        
-        // Calculate movement vector
-        Vector2 movement = { 
-            positionDelta.x,
-            positionDelta.z 
-        };
-        
-        // Project movement along the wall
-        float dotProduct = movement.x * wallNormal.x + movement.y * wallNormal.y;
-        
-        Vector2 perpendicular = {
-            wallNormal.x * dotProduct,
-            wallNormal.y * dotProduct
-        };
-        
-        // Only the parallel component remains
-        Vector2 parallel = {
-            movement.x - perpendicular.x,
-            movement.y - perpendicular.y
-        };
-        
-        // Scale down the parallel movement slightly for safety
-        parallel.x *= 0.9f;
-        parallel.y *= 0.9f;
-        
-        // Apply rotation changes regardless of collision
-        Vector3 rotationChange = {
-            newDirection.x - oldDirection.x,
-            newDirection.y - oldDirection.y,
-            newDirection.z - oldDirection.z
-        };
-        
-        // Reset position to old position
-        camera->position = oldCamPos;
-        
-        // Apply the parallel movement (sliding along wall)
-        camera->position.x += parallel.x;
-        camera->position.z += parallel.y;
-        
-        // Update target based on our new position and the rotation change
-        camera->target.x = camera->position.x + oldDirection.x + rotationChange.x;
-        camera->target.y = camera->position.y + oldDirection.y + rotationChange.y;
-        camera->target.z = camera->position.z + oldDirection.z + rotationChange.z;
-        
-        // Extra safety check - if our new position collides with any wall, retreat completely
-        Vector2 newPos = { camera->position.x, camera->position.z };
-        bool secondaryCollision = false;
-        
-        // Safety check code...
-        for (int y = playerCellY - 2; y <= playerCellY + 2 && y < resources.cubicmap.height; y++) {
-            for (int x = playerCellX - 2; x <= playerCellX + 2 && x < resources.cubicmap.width; x++) {
-                if (y < 0 || x < 0) continue;
-                
-                if ((resources.mapPixels[y*resources.cubicmap.width + x].r == 255) &&
-                    (CheckCollisionCircleRec(newPos, PLAYER_RADIUS * 1.1f,
-                    (Rectangle){ resources.mapPosition.x - 0.5f + x*1.0f, 
-                                resources.mapPosition.z - 0.5f + y*1.0f, 1.0f, 1.0f })))
-                {
-                    secondaryCollision = true;
                     break;
                 }
             }
-            if (secondaryCollision) break;
         }
+        if (collision) break;
+    }
+    UnloadImageColors(pixels);
+
+    TraceLog(LOG_INFO, "[PlayerCollides] Pos:(%.2f,%.2f) Bounds:x[%d-%d] z[%d-%d] Result:%s",
+        playerPos.x, playerPos.z, minX, maxX, minZ, maxZ, collision ? "COLLIDE" : "CLEAR");
+
+    return collision;
+}
+
+Vector3 HandleCollisions(Camera *camera, Vector3 localMovement, GameResources resources)
+{
+    // Store the original position
+    Vector3 originalPos = camera->position;
+    
+    // Convert camera-relative movement to world-space movement
+    Vector3 forward = Vector3Normalize(Vector3Subtract(camera->target, camera->position));
+    Vector3 right = Vector3Normalize(Vector3CrossProduct(forward, camera->up));
+    
+    Vector3 worldMovement =
+    {
+        forward.x * localMovement.x + right.x * localMovement.y,
+        localMovement.z,
+        forward.z * localMovement.x + right.z * localMovement.y
+    };
+    
+    // Simulate the new position
+    Vector3 targetPos = Vector3Add(originalPos, worldMovement);
+    
+    // Check if target position collides
+    if (!PlayerCollides(targetPos, resources))
+    {
+        // No collision, return the original movement
+        return localMovement;
+    }
+    
+    // We have a collision, determine the wall normal more accurately
+    Vector2 wallNormal = {0};
+    
+    // Test X-axis movement only
+    Vector3 xTestPos = originalPos;
+    xTestPos.x += worldMovement.x;
+    bool xCollision = PlayerCollides(xTestPos, resources);
+    
+    // Test Z-axis movement only
+    Vector3 zTestPos = originalPos;
+    zTestPos.z += worldMovement.z;
+    bool zCollision = PlayerCollides(zTestPos, resources);
+    
+    // Set wall normal based on which axis collides
+    if (xCollision && !zCollision)
+    {
+        wallNormal.x = (worldMovement.x > 0) ? -1.0f : 1.0f;
+        wallNormal.y = 0.0f;
+    }
+    else if (!xCollision && zCollision)
+    {
+        wallNormal.x = 0.0f;
+        wallNormal.y = (worldMovement.z > 0) ? -1.0f : 1.0f;
+    }
+    else if (xCollision && zCollision)
+    {
+        wallNormal.x = (worldMovement.x > 0) ? -1.0f : 1.0f;
+        wallNormal.y = (worldMovement.z > 0) ? -1.0f : 1.0f;
         
-        // If still in wall, revert to original position completely
-        if (secondaryCollision) {
-            camera->position = oldCamPos;
+        // Normalize this diagonal normal
+        wallNormal = Vector2Normalize(wallNormal);
+    }
+    else
+    {
+        // Strange case - targetPos collides but neither axis alone does
+        if (fabs(worldMovement.x) > fabs(worldMovement.z))
+        {
+            wallNormal.x = (worldMovement.x > 0) ? -1.0f : 1.0f;
+            wallNormal.y = 0.0f;
+        }
+        else
+        {
+            wallNormal.x = 0.0f;
+            wallNormal.y = (worldMovement.z > 0) ? -1.0f : 1.0f;
         }
     }
+    
+    // Handle collision response (sliding along walls)
+    Vector2 movement = { worldMovement.x, worldMovement.z };
+    
+    // Calculate dot product for projection
+    float dotProduct = Vector2DotProduct(movement, wallNormal);
+    
+    // Calculate perpendicular component (against the wall)
+    Vector2 perpendicular = Vector2Scale(wallNormal, dotProduct);
+    
+    // Calculate parallel component (along the wall)
+    Vector2 parallel = Vector2Subtract(movement, perpendicular);
+    
+    // Check if we have a meaningful parallel component
+    float parallelMagnitude = Vector2Length(parallel);
+    
+    if (parallelMagnitude < 0.001f)
+    {
+        // Almost no parallel component, create a perpendicular slide direction
+        parallel.x = -wallNormal.y;
+        parallel.y = wallNormal.x;
+        
+        // Scale based on original movement magnitude
+        float originalMagnitude = Vector2Length(movement);
+        parallel = Vector2Scale(parallel, 0.5f * originalMagnitude);
+    }
+    else
+    {
+        // Scale down parallel component to prevent sliding into corners
+        parallel = Vector2Scale(parallel, 0.8f);
+    }
+    
+    // Create the adjusted world movement
+    Vector3 adjustedWorldMovement =
+    {
+        parallel.x,
+        worldMovement.y, // Keep vertical movement
+        parallel.y
+    };
+    
+    // Test if the adjusted movement is collision-free
+    Vector3 adjustedTargetPos = Vector3Add(originalPos, adjustedWorldMovement);
+    if (PlayerCollides(adjustedTargetPos, resources))
+    {
+        // Try a smaller movement (half the magnitude)
+        adjustedWorldMovement = Vector3Scale(adjustedWorldMovement, 0.5f);
+        
+        adjustedTargetPos = Vector3Add(originalPos, adjustedWorldMovement);
+        if (PlayerCollides(adjustedTargetPos, resources))
+        {
+            return Vector3Zero(); // Still colliding, cancel movement
+        }
+    }
+    
+    // Convert the world movement back to camera-relative coordinates
+    Vector3 result;
+    
+    // Create a 2D version of the adjusted movement for projection
+    Vector2 adjustedMovement2D = { adjustedWorldMovement.x, adjustedWorldMovement.z };
+    Vector2 forward2D = { forward.x, forward.z };
+    Vector2 right2D = { right.x, right.z };
+    
+    // Project onto forward and right vectors
+    result.x = Vector2DotProduct(adjustedMovement2D, forward2D);
+    result.y = Vector2DotProduct(adjustedMovement2D, right2D);
+    result.z = localMovement.z;
+    
+    return result;
+}
+
+void UpdatePlayerMovement(Camera* camera, GameResources resources)
+{
+    const float sqrt2 = 1.41421356237f;
+    
+    float zoom = 0.0f;
+    Vector3 rotation = {0, 0, 0};
+    Vector3 localMovement = {0, 0, 0};
+
+    rotation.x = GetMouseDelta().x * DEFAULT_MOUSE_SENSITIVITY;
+    rotation.y = GetMouseDelta().y * DEFAULT_MOUSE_SENSITIVITY;
+
+    float straightMovementSpeed = PLAYER_SPEED * GetFrameTime();
+    float diagonalMovementSpeed = straightMovementSpeed / sqrt2;
+    bool W = IsKeyDown(KEY_W);
+    bool A = IsKeyDown(KEY_A);
+    bool S = IsKeyDown(KEY_S);
+    bool D = IsKeyDown(KEY_D);
+
+    // Calculate camera-local movement based on input
+    if (W)
+    {
+        if (A || D) localMovement.x += diagonalMovementSpeed;
+        else localMovement.x += straightMovementSpeed;
+    }
+    if (S) // Assuming S is backward
+    {
+        if (A || D) localMovement.x -= diagonalMovementSpeed;
+        else localMovement.x -= straightMovementSpeed;
+    }
+
+    if (A)
+    {
+        if (W || S) localMovement.y -= diagonalMovementSpeed;
+        else localMovement.y -= straightMovementSpeed;
+    }
+    if (D)
+    {
+        if (W || S) localMovement.y += diagonalMovementSpeed;
+        else localMovement.y += straightMovementSpeed;
+    }
+    
+    // Handle collision detection - modifies localMovement if necessary
+    localMovement = HandleCollisions(camera, localMovement, resources);
+    
+    // Update camera using the (potentially modified) localMovement
+    UpdateCameraPro(camera, localMovement, rotation, zoom);
 }
