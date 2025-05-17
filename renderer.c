@@ -53,8 +53,8 @@ void RenderFrame(Camera camera, GameResources resources, Root root, int playerCe
     //                                 "#191#Question", resources.questions[59].questionText, "A;B;C;D");
     // GuiLabel((Rectangle){600, 200, 1000, 400}, resources.questions[59].answersText[0]);
     // GuiLabel((Rectangle){600, 300, 1000, 400}, resources.questions[59].answersText[1]);
-    GuiMessageBox((Rectangle){500, 250, 600, 400}, 
-                  "#191#Question", resources.questions[59].questionText, "A;B;C;D");
+    GuiWindowBox((Rectangle){500, 250, 600, 400}, 
+                  "#191#Question");
 
     // Define spacing for answers
     float answerSpacing = 50; // Vertical spacing between answers
@@ -64,6 +64,7 @@ void RenderFrame(Camera camera, GameResources resources, Root root, int playerCe
     float firstAnswerY = 250 + 100; // Start below the question text
 
     // Draw each answer
+    GuiLabel((Rectangle){answerX, firstAnswerY - answerSpacing, answerWidth, answerHeight}, resources.questions[59].questionText);
     GuiLabel((Rectangle){answerX, firstAnswerY, answerWidth, answerHeight}, resources.questions[59].answersText[0]);
     GuiLabel((Rectangle){answerX, firstAnswerY + answerSpacing, answerWidth, answerHeight}, resources.questions[59].answersText[1]);
     GuiLabel((Rectangle){answerX, firstAnswerY + 2 * answerSpacing, answerWidth, answerHeight}, resources.questions[59].answersText[2]);
