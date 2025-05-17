@@ -1,4 +1,5 @@
 #include "game.h"
+#define RAYGUI_IMPLEMENTATION
 
 
 int main(void)
