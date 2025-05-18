@@ -4,6 +4,13 @@
 #include<stdbool.h>
 #include "raylib.h"
 
+typedef enum {
+    MENU_NONE,
+    MENU_START,
+    MENU_SETTINGS,
+    MENU_EXIT
+} Menu_Result;
+
 typedef struct
 {
     Rectangle rectangle;
@@ -16,6 +23,7 @@ typedef struct Menu
 {
     bool active;
     Button start_button;
+    Button settings_button;
     Button exit_button;
 }Menu;
 

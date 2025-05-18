@@ -19,8 +19,20 @@ void initialize_menu(Menu *menu, int screen_width, int screen_height)
     menu->start_button.bg_color = GRAY;
     menu->start_button.text_color = WHITE;
 
+    menu->settings_button.rectangle = (Rectangle)
+    {
+    screen_width/2 - 100,
+    screen_height/2 - 20,  
+    200,
+    50
+    };
+
+    menu->settings_button.text = "SETTINGS";
+    menu->settings_button.bg_color = GRAY;
+    menu->settings_button.text_color = BLACK;
+
     menu->exit_button.rectangle = (Rectangle)
-     {
+    {
         screen_width/2 - 100,
         screen_height/2 + 20,
         200,
@@ -41,6 +53,11 @@ void update_menu(Menu *menu)
     else
         menu->start_button.bg_color = LIGHTGRAY;
 
+    if (CheckCollisionPointRec(mouse_point, menu->settings_button.rectangle))
+        menu->settings_button.bg_color = GRAY;
+    else
+        menu->settings_button.bg_color = LIGHTGRAY;
+
     if (CheckCollisionPointRec(mouse_point, menu->exit_button.rectangle))
         menu->exit_button.bg_color = GRAY;
     else
@@ -52,6 +69,12 @@ void update_menu(Menu *menu)
         {
             menu->active = false;  
         }
+
+        else if (CheckCollisionPointRec(mouse_point, menu->settings_button.rectangle))
+        {
+            menu->active = false;
+        }
+
         else if (CheckCollisionPointRec(mouse_point, menu->exit_button.rectangle))
         {
             CloseWindow();
@@ -79,6 +102,14 @@ void draw_menu(const Menu *menu)
              menu->start_button.rectangle.y + (menu->start_button.rectangle.height - 20)/2,
              20,
              menu->start_button.text_color);
+
+    DrawRectangleRec(menu->settings_button.rectangle, menu->settings_button.bg_color);
+    txt_w = MeasureText(menu->settings_button.text, 20);
+    DrawText(menu->settings_button.text,
+         menu->settings_button.rectangle.x + (menu->settings_button.rectangle.width - txt_w)/2,
+         menu->settings_button.rectangle.y + (menu->settings_button.rectangle.height - 20)/2,
+         20,
+         menu->settings_button.text_color);
 
     
     DrawRectangleRec(menu->exit_button.rectangle, menu->exit_button.bg_color);
