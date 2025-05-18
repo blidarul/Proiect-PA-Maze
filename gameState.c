@@ -31,5 +31,5 @@ void SetGameState(GameState state)
 void InitGameState(void)
 {
     currentState = GAME_STATE_TITLE;
-    EnableCursor(); // Ensure cursor is enabled for the initial title state
+    EnableCursor();
 }

@@ -4,14 +4,13 @@
 #include "raylib.h"
 #include "sound.h"
 #include "raygui.h"
+#include "title.h" // Added to access app_settings
 
 static float currentStamina = MAX_STAMINA;
 static Rectangle bounds = { .x=SCREEN_WIDTH-MINIMAP_DIST_FROM_BORDER-STAMINA_BAR_LENGHT,
                             .y=SCREEN_HEIGHT-MINIMAP_DIST_FROM_BORDER-STAMINA_BAR_HEIGHT,
                             .height=STAMINA_BAR_HEIGHT,
                             .width=STAMINA_BAR_LENGHT};
-
-#define DEBUG_STAMINA
 
 static inline int MAX(int a, int b)
 {
@@ -237,8 +236,13 @@ void UpdatePlayerMovement(Camera *camera, GameResources resources)
 
     float delta = GetFrameTime();
 
-    rotation.x = GetMouseDelta().x * DEFAULT_MOUSE_SENSITIVITY;
-    rotation.y = GetMouseDelta().y * DEFAULT_MOUSE_SENSITIVITY;
+    // Calculate effective mouse sensitivity based on settings
+    // Assuming app_settings.sensitivity is a range (e.g., 10-100) and 50.0f is "normal"
+    // And DEFAULT_MOUSE_SENSITIVITY is a small base value (e.g., 0.005f)
+    float effectiveMouseSensitivity = (app_settings.sensitivity / 50.0f) * DEFAULT_MOUSE_SENSITIVITY;
+
+    rotation.x = GetMouseDelta().x * effectiveMouseSensitivity;
+    rotation.y = GetMouseDelta().y * effectiveMouseSensitivity;
 
     float straightMovementSpeed = PLAYER_SPEED * delta;
     float diagonalMovementSpeed = straightMovementSpeed / sqrt2;

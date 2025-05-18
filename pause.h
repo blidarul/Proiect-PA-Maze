@@ -35,7 +35,6 @@ typedef struct
     PauseButton resume_button;
     PauseButton settings_button;
     PauseButton exit_button;
-    PauseSlider volume_slider;
     Menu_action action;
 } Pause_menu;
 

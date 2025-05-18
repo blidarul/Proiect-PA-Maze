@@ -16,15 +16,16 @@
 #define PLAYER_RADIUS 0.2f
 #define DEFAULT_MOUSE_SENSITIVITY 0.1f
 #define PLAYER_SPEED 2.0f
-#define PLAYER_ACCELERATION 1.8f //For sprinting 
+#define PLAYER_ACCELERATION 1.8f 
 #define PLAYER_FOV 65.0f
 #define PLAYER_HEIGHT 0.5f
+
+//stamina related
 #define MAX_STAMINA 100.0f
 #define STAMINA_DRAIN_RATE 40.0f
 #define STAMINA_RECOVERY 25.0f
 #define STAMINA_BAR_LENGHT 250.0f
 #define STAMINA_BAR_HEIGHT 50.0f
-
 
 //sound related
 #define STEP_SOUND_COUNT 4

@@ -27,6 +27,8 @@ static RenderTexture2D lastFrameTexture; // RenderTexture to store the last 3D f
 bool isQuestionActive = false; // Tracks the number of questions answered
 static int currentQuestionIndex = -1; // Stores the index of the current question
 
+static GameState previousGameState; // Added to store the state before settings
+
 void InitGame(void)
 {
     // Initialize window
@@ -45,6 +47,7 @@ void InitGame(void)
 
     // Initialize Title Menu
     initialize_menu(&titleMenu, SCREEN_WIDTH, SCREEN_HEIGHT);
+    initialize_settings(&app_settings, SCREEN_WIDTH, SCREEN_HEIGHT); // Initialize settings data
 
     // Initialize Camera, Maze, Resources for the first time (or after a full exit)
     camera = InitializeCamera();
@@ -61,6 +64,7 @@ void InitGame(void)
     lastFrameTexture = LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     SetGameState(GAME_STATE_TITLE);
+    previousGameState = GAME_STATE_TITLE; // Initialize previousGameState
 }
 
 void RunGameLoop(void)
@@ -82,12 +86,14 @@ void RunGameLoop(void)
                     }
                     else if (title_action == MENU_SETTINGS)
                     {
+                        previousGameState = GAME_STATE_TITLE; // Store current state
                         SetGameState(GAME_STATE_SETTINGS);
                     }
                     else if (title_action == MENU_EXIT)
                     {
                         CleanupGame();
                         CloseWindow();
+                        return; // Exit RunGameLoop after cleanup
                     }
 
                     // Draw the title menu only if we are still in the title state
@@ -105,17 +111,30 @@ void RunGameLoop(void)
                 break;
                 
             case GAME_STATE_SETTINGS:
-                update_settings(&app_settings);
-                if (IsKeyPressed(KEY_ESCAPE))
                 {
-                    SetGameState(GAME_STATE_TITLE);
-                    if (!titleMenu.active) titleMenu.active = true;
+                    bool shouldExitSettings = update_settings(&app_settings);
+                    if (shouldExitSettings)
+                    {
+                        SetGameState(previousGameState); // Go back to the stored previous state
+                        // Ensure title menu is active if returning to title
+                        if (previousGameState == GAME_STATE_TITLE && !titleMenu.active)
+                        {
+                            titleMenu.active = true;
+                        }
+                    }
+                    // The ESC key to go back is now handled by the "Back" button in settings.c
+                    // if (IsKeyPressed(KEY_ESCAPE))
+                    // {
+                    //     SetGameState(previousGameState); 
+                    //     if (previousGameState == GAME_STATE_TITLE && !titleMenu.active) titleMenu.active = true;
+                    // }
+
+                    BeginDrawing();
+                    ClearBackground(RAYWHITE);
+                    draw_settings(&app_settings);
+                    // DrawText("Press ESC to go back", 10, 10, 20, DARKGRAY); // No longer needed if Back button is primary
+                    EndDrawing();
                 }
-                BeginDrawing();
-                ClearBackground(RAYWHITE);
-                draw_settings(&app_settings);
-                DrawText("Press ESC to go back", 10, 10, 20, DARKGRAY);
-                EndDrawing();
                 break;
 
 
@@ -164,29 +183,33 @@ void RunGameLoop(void)
                 break;
 
             case GAME_STATE_PAUSE:
-                UpdatePauseControls(&pauseMenu);
+                { // Added braces for scope
+                    Menu_action pauseAction = UpdatePauseControls(&pauseMenu); // UpdatePauseControls should return the action
 
-                Menu_action pauseAction = pauseMenu.action;
-                if (pauseAction == MENU_ACTION_RESUME)
-                {
-                    SetGameState(GAME_STATE_GAMEPLAY);
-                }
-                else if (pauseAction == MENU_ACTION_SETTINGS)
-                {
-                    SetGameState(GAME_STATE_SETTINGS);
-                }
-                else if (pauseAction == MENU_ACTION_EXIT)
-                {
-                    CloseWindow();
-                }
+                    if (pauseAction == MENU_ACTION_RESUME)
+                    {
+                        SetGameState(GAME_STATE_GAMEPLAY);
+                    }
+                    else if (pauseAction == MENU_ACTION_SETTINGS)
+                    {
+                        previousGameState = GAME_STATE_PAUSE; // Store current state
+                        SetGameState(GAME_STATE_SETTINGS);
+                    }
+                    else if (pauseAction == MENU_ACTION_EXIT)
+                    {
+                        CleanupGame(); // Ensure cleanup before closing
+                        CloseWindow();
+                        return; // Exit RunGameLoop after cleanup
+                    }
 
-                BeginDrawing();
-                ClearBackground(RAYWHITE);
-                RenderFrame(camera, resources, maze->root,
-                            (int)(camera.position.x), (int)(camera.position.z),
-                            true);
-                DrawPauseControls(&pauseMenu);
-                EndDrawing();
+                    BeginDrawing();
+                    ClearBackground(RAYWHITE); // Or draw the game screen blurred
+                    RenderFrame(camera, resources, maze->root,
+                                (int)(camera.position.x), (int)(camera.position.z),
+                                true); // Assuming true means draw blurred or dimmed for pause
+                    DrawPauseControls(&pauseMenu);
+                    EndDrawing();
+                }
                 break;
 
             case GAME_STATE_QUESTION:
@@ -195,7 +218,7 @@ void RunGameLoop(void)
 
                 // Draw the last frame as the background
                 DrawTextureRec(lastFrameTexture.texture,
-                               (Rectangle){0, 0, lastFrameTexture.texture.width, -lastFrameTexture.texture.height},
+                               (Rectangle){0, 0, (float)lastFrameTexture.texture.width, (float)-lastFrameTexture.texture.height},
                                (Vector2){0, 0}, WHITE);
 
                 // Draw the question window
@@ -204,6 +227,8 @@ void RunGameLoop(void)
                 break;
         }
     }
+    // If loop exits due to WindowShouldClose() but not MENU_EXIT
+    CleanupGame(); 
 }
 
 void CleanupGame(void)
