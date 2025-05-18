@@ -8,7 +8,7 @@ typedef enum
 {
     MENU_ACTION_NONE = 0,
     MENU_ACTION_RESUME,
-    MENU_ACTION_RESTART,
+    MENU_ACTION_SETTINGS,
     MENU_ACTION_EXIT
 } Menu_action;
 
@@ -33,7 +33,7 @@ typedef struct
 {
     bool active;
     PauseButton resume_button;
-    PauseButton restart_button;
+    PauseButton settings_button;
     PauseButton exit_button;
     PauseSlider volume_slider;
     Menu_action action;

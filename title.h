@@ -1,8 +1,11 @@
 #ifndef TITLE_H
 #define TITLE_H
 
-#include<stdbool.h>
+#include <stdbool.h>
 #include "raylib.h"
+#include "settings.h" // Ensure settings.h is included
+
+extern Settings app_settings; // Declare app_settings for external access
 
 typedef enum {
     MENU_NONE,
@@ -28,11 +31,8 @@ typedef struct Menu
 }Menu;
 
 void initialize_menu(Menu *menu, int screen_width, int screen_height);
-
-void update_menu(Menu *menu);
-
+Menu_Result update_menu(Menu *menu);
 void draw_menu(const Menu *menu);
-
 void unload_menu(Menu *menu);
 
 #endif

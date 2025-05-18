@@ -17,15 +17,13 @@ void SetGameState(GameState state)
         DisableCursor();
         break;
     case GAME_STATE_TITLE:
-        EnableCursor();
-        break;
-    case GAME_STATE_QUESTION:
-        EnableCursor();
-        break;
     case GAME_STATE_PAUSE:
+    case GAME_STATE_QUESTION:
+    case GAME_STATE_SETTINGS:
         EnableCursor();
         break;
     default:
+        EnableCursor(); 
         break;
     }
 }
@@ -33,4 +31,5 @@ void SetGameState(GameState state)
 void InitGameState(void)
 {
     currentState = GAME_STATE_TITLE;
+    EnableCursor(); // Ensure cursor is enabled for the initial title state
 }
