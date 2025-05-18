@@ -65,48 +65,50 @@ void RunGameLoop(void)
             case GAME_STATE_TITLE:
                 update_menu(&titleMenu);
 
-                if (!titleMenu.active)
+                if (titleMenu.active)
+                {
+                    BeginDrawing();
+                    ClearBackground(RAYWHITE);
+                    draw_menu(&titleMenu);
+                    EndDrawing();
+                }
+                else
                 {
                     SetGameState(GAME_STATE_GAMEPLAY);
+                    DisableCursor();
                 }
-
-                BeginDrawing();
-                ClearBackground(RAYWHITE);
-                draw_menu(&titleMenu);
-                EndDrawing();
                 break;
                 
             case GAME_STATE_GAMEPLAY:
-                if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_P))
+                if (IsKeyPressed(KEY_ESCAPE))
                 {
                     SetGameState(GAME_STATE_PAUSE);
                     InitializePauseControls(&pauseMenu, SCREEN_WIDTH, SCREEN_HEIGHT);
                 }
+                else
+                {
+                    UpdatePlayerMovement(&camera, resources);
 
-                UpdatePlayerMovement(&camera, resources);
+                    // Calculate player position in grid
+                    int playerPixelX = (int)floorf(camera.position.x);
+                    int playerPixelY = (int)floorf(camera.position.z);
 
-
-                // Calculate player position in grid
-                int playerPixelX = (int)floorf(camera.position.x);
-                int playerPixelY = (int)floorf(camera.position.z);
-
-                playerPixelX = Clamp(playerPixelX, 0, resources.cubicimage.width - 1);
-                playerPixelY = Clamp(playerPixelY, 0, resources.cubicimage.height - 1);
-                     
-
-                VisitCell(maze, playerPixelX, playerPixelY, &resources);
-                
-                // Render the frame
-                RenderFrame(camera, resources, maze->root, playerPixelX, playerPixelY);
-
+                    playerPixelX = Clamp(playerPixelX, 0, resources.cubicimage.width - 1);
+                    playerPixelY = Clamp(playerPixelY, 0, resources.cubicimage.height - 1);
+                         
+                    VisitCell(maze, playerPixelX, playerPixelY, &resources);
+                    
+                    BeginDrawing();
+                    ClearBackground(DARKBLUE);
+                    RenderFrame(camera, resources, maze->root, playerPixelX, playerPixelY, false);
+                    EndDrawing();
+                }
                 break;
                 
             case GAME_STATE_PAUSE:
-                // Handle pause menu updates and drawing
-                UpdatePauseControls(&pauseMenu); // Example call
+                UpdatePauseControls(&pauseMenu); 
                 
-                // Determine action from pause menu
-                Menu_action pauseAction = pauseMenu.action; // Assuming 'action' is updated by UpdatePauseControls
+                Menu_action pauseAction = pauseMenu.action; 
                 if (pauseAction == MENU_ACTION_RESUME) {
                     SetGameState(GAME_STATE_GAMEPLAY);
                 }
@@ -130,10 +132,8 @@ void RunGameLoop(void)
                 break;
 
             case GAME_STATE_QUESTION:
-                // Handle question state if you implement it
                 BeginDrawing();
                 ClearBackground(RAYWHITE);
-                // Draw question UI
                 DrawText("Question State - Not Implemented", 20, 20, 20, DARKGRAY);
                 EndDrawing();
                 break;

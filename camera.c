@@ -6,7 +6,12 @@
 #include "raygui.h"
 
 static float currentStamina = MAX_STAMINA;
-static Rectangle bounds = {.x=SCREEN_WIDTH-MINIMAP_DIST_FROM_BORDER-STAMINA_BAR_LENGHT,.y=SCREEN_HEIGHT-MINIMAP_DIST_FROM_BORDER-STAMINA_BAR_HEIGHT,.height=STAMINA_BAR_HEIGHT,.width=STAMINA_BAR_LENGHT};
+static Rectangle bounds = { .x=SCREEN_WIDTH-MINIMAP_DIST_FROM_BORDER-STAMINA_BAR_LENGHT,
+                            .y=SCREEN_HEIGHT-MINIMAP_DIST_FROM_BORDER-STAMINA_BAR_HEIGHT,
+                            .height=STAMINA_BAR_HEIGHT,
+                            .width=STAMINA_BAR_LENGHT};
+
+#define DEBUG_STAMINA
 
 static inline int MAX(int a, int b)
 {
@@ -264,7 +269,11 @@ void UpdatePlayerMovement(Camera *camera, GameResources resources)
                 currentStamina = MAX_STAMINA;
         }
     }
-        TraceLog(LOG_INFO,"%f/%f",currentStamina,MAX_STAMINA);
+
+    #ifdef DEBUG_STAMINA
+        TraceLog(LOG_INFO,"Player stamina: %.2f/%.2f",currentStamina,MAX_STAMINA);
+    #endif
+
     if (W)
     {
         if (A || D)
