@@ -3,6 +3,10 @@
 #include <math.h>
 #include "raylib.h"
 #include "sound.h"
+#include "raygui.h"
+
+static float currentStamina = MAX_STAMINA;
+static Rectangle bounds = {.x=SCREEN_WIDTH-MINIMAP_DIST_FROM_BORDER-STAMINA_BAR_LENGHT,.y=SCREEN_HEIGHT-MINIMAP_DIST_FROM_BORDER-STAMINA_BAR_HEIGHT,.height=STAMINA_BAR_HEIGHT,.width=STAMINA_BAR_LENGHT};
 
 static inline int MAX(int a, int b)
 {
@@ -207,28 +211,16 @@ Vector3 HandleCollisions(Camera *camera, Vector3 localMovement, GameResources re
 
     return result;
 }
+
 // Function to draw the stamina bar
-void DrawStaminaBar(float currentStamina, float maxStamina)
+
+void DrawStaminaBar()
 {
-    float barWidth = 200;
-    float barHeight = 20;
-    float percent = currentStamina / maxStamina;
-    float filledWidth = barWidth * percent;
+    
 
-    // Get screen size
-    int screenWidth = GetScreenWidth();
-    int screenHeight = GetScreenHeight();
-
-    // Position the bar in the bottom-right corner with padding
-    Vector2 barPos = {
-        screenWidth - barWidth - 20,
-        screenHeight - barHeight - 20
-    };
-
-    DrawRectangleV(barPos, (Vector2){barWidth, barHeight}, DARKGRAY);
-    DrawRectangleV(barPos, (Vector2){filledWidth, barHeight}, GREEN);
-    DrawRectangleLines((int)barPos.x, (int)barPos.y, barWidth, barHeight, BLACK);
+        GuiProgressBar(bounds,NULL,NULL,&currentStamina,0.0f,MAX_STAMINA);
 }
+
 
 
 void UpdatePlayerMovement(Camera *camera, GameResources resources)
@@ -237,10 +229,6 @@ void UpdatePlayerMovement(Camera *camera, GameResources resources)
     float zoom = 0.0f;
     Vector3 rotation = {0, 0, 0};
     Vector3 localMovement = {0, 0, 0};
-
-
-    static float currentStamina = maxStamina;
-    static bool isSprinting = false;
 
     float delta = GetFrameTime();
 
@@ -256,29 +244,27 @@ void UpdatePlayerMovement(Camera *camera, GameResources resources)
     bool D = IsKeyDown(KEY_D);
     bool SHIFT = IsKeyDown(KEY_LEFT_SHIFT);
 
-    isSprinting = false;
     if (SHIFT && (W || A || S || D) && currentStamina > 0.0f)
     {
         straightMovementSpeed *= PLAYER_ACCELERATION;
         diagonalMovementSpeed *= PLAYER_ACCELERATION;
 
-        currentStamina -= staminaDrainRate * delta;
+        currentStamina -= STAMINA_DRAIN_RATE * delta;
         if (currentStamina < 0.0f)
             currentStamina = 0.0f;
 
-        isSprinting = true;
     }
     else
     {
-        if (currentStamina < maxStamina)
+        if (currentStamina < MAX_STAMINA)
         {
-            currentStamina += (staminaRegenRate * delta);
+            currentStamina += (STAMINA_RECOVERY * delta);
 
-            if (currentStamina > maxStamina)
-                currentStamina = maxStamina;
+            if (currentStamina > MAX_STAMINA)
+                currentStamina = MAX_STAMINA;
         }
     }
-
+        TraceLog(LOG_INFO,"%f/%f",currentStamina,MAX_STAMINA);
     if (W)
     {
         if (A || D)

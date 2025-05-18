@@ -19,6 +19,11 @@
 #define PLAYER_ACCELERATION 1.8f //For sprinting 
 #define PLAYER_FOV 65.0f
 #define PLAYER_HEIGHT 0.5f
+#define MAX_STAMINA 100.0f
+#define STAMINA_DRAIN_RATE 40.0f
+#define STAMINA_RECOVERY 25.0f
+#define STAMINA_BAR_LENGHT 250.0f
+#define STAMINA_BAR_HEIGHT 50.0f
 
 
 //sound related
