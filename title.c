@@ -52,20 +52,13 @@ Menu_Result update_menu(Menu *menu)
     int screen_height = GetScreenHeight();
     Menu_Result result = MENU_NONE;
 
-    if (CheckCollisionPointRec(mouse_point, menu->start_button.rectangle))
-        menu->start_button.bg_color = GRAY;
-    else
-        menu->start_button.bg_color = LIGHTGRAY;
+    // Remove direct color changes from here if DrawEnhancedButton handles hover visuals
+    // if (CheckCollisionPointRec(mouse_point, menu->start_button.rectangle))
+    //     menu->start_button.bg_color = GRAY; // Or keep this for non-hovered state
+    // else
+    //     menu->start_button.bg_color = LIGHTGRAY;
 
-    if (CheckCollisionPointRec(mouse_point, menu->settings_button.rectangle))
-        menu->settings_button.bg_color = GRAY;
-    else
-        menu->settings_button.bg_color = LIGHTGRAY;
-
-    if (CheckCollisionPointRec(mouse_point, menu->exit_button.rectangle))
-        menu->exit_button.bg_color = GRAY;
-    else
-        menu->exit_button.bg_color = LIGHTGRAY;
+    // ... (similar for other buttons) ...
 
     if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON))
     {
@@ -89,40 +82,62 @@ Menu_Result update_menu(Menu *menu)
 
 void draw_menu(const Menu *menu)
 {
+    // --- Enhanced Title Text ---
     const char *header = "MAIN MENU";
+    int headerFontSize = 40; // Increased font size
+    Color headerColor = DARKBLUE; // Or another color like GOLD, MAROON
 
-    int header_w = MeasureText(header, 20);
+    int header_w = MeasureText(header, headerFontSize);
     DrawText(header,
              GetScreenWidth()/2 - header_w/2,
-             100,
-             20,
-             DARKBLUE);
+             80, // Adjusted Y position
+             headerFontSize,
+             headerColor);
 
+    // --- Enhanced Button Drawing ---
+    Vector2 mousePoint = GetMousePosition(); // Get mouse position once for hover checks
+
+    // Helper function to draw a single button with enhancements
+    auto void DrawEnhancedButton(const Button *button, bool isHovered)
+    {
+        Color currentBgColor = button->bg_color;
+        Color currentTextColor = button->text_color;
+        Color borderColor = BLACK;
+        float borderThickness = 2.0f;
+
+        if (isHovered)
+        {
+            currentBgColor = DARKGRAY; // Darker hover
+            currentTextColor = WHITE;
+            borderColor = WHITE; // Brighter border on hover
+        }
+
+        // Draw border
+        DrawRectangleLinesEx(button->rectangle, borderThickness, borderColor);
+        
+        // Draw background
+        DrawRectangleRec(button->rectangle, currentBgColor);
+        
+        // Draw text
+        int txt_w = MeasureText(button->text, 20);
+        DrawText(button->text,
+                 button->rectangle.x + (button->rectangle.width - txt_w)/2,
+                 button->rectangle.y + (button->rectangle.height - 20)/2,
+                 20,
+                 currentTextColor);
+    };
+
+    // Start Button
+    bool startHovered = CheckCollisionPointRec(mousePoint, menu->start_button.rectangle);
+    DrawEnhancedButton(&menu->start_button, startHovered);
+
+    // Settings Button
+    bool settingsHovered = CheckCollisionPointRec(mousePoint, menu->settings_button.rectangle);
+    DrawEnhancedButton(&menu->settings_button, settingsHovered);
     
-    DrawRectangleRec(menu->start_button.rectangle, menu->start_button.bg_color);
-    int txt_w = MeasureText(menu->start_button.text, 20);
-    DrawText(menu->start_button.text,
-             menu->start_button.rectangle.x + (menu->start_button.rectangle.width - txt_w)/2,
-             menu->start_button.rectangle.y + (menu->start_button.rectangle.height - 20)/2,
-             20,
-             menu->start_button.text_color);
-
-    DrawRectangleRec(menu->settings_button.rectangle, menu->settings_button.bg_color);
-    txt_w = MeasureText(menu->settings_button.text, 20);
-    DrawText(menu->settings_button.text,
-         menu->settings_button.rectangle.x + (menu->settings_button.rectangle.width - txt_w)/2,
-         menu->settings_button.rectangle.y + (menu->settings_button.rectangle.height - 20)/2,
-         20,
-         menu->settings_button.text_color);
-
-    
-    DrawRectangleRec(menu->exit_button.rectangle, menu->exit_button.bg_color);
-    txt_w = MeasureText(menu->exit_button.text, 20);
-    DrawText(menu->exit_button.text,
-             menu->exit_button.rectangle.x + (menu->exit_button.rectangle.width - txt_w)/2,
-             menu->exit_button.rectangle.y + (menu->exit_button.rectangle.height - 20)/2,
-             20,
-             menu->exit_button.text_color);
+    // Exit Button
+    bool exitHovered = CheckCollisionPointRec(mousePoint, menu->exit_button.rectangle);
+    DrawEnhancedButton(&menu->exit_button, exitHovered);
 }
 
 void unload_menu(Menu *menu)

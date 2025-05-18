@@ -100,7 +100,7 @@ void RunGameLoop(void)
                     if (GetGameState() == GAME_STATE_TITLE)
                     {
                         BeginDrawing();
-                        ClearBackground(RAYWHITE);
+                        ClearBackground(BEIGE);
                         if (titleMenu.active)
                         {
                             draw_menu(&titleMenu);
@@ -122,17 +122,9 @@ void RunGameLoop(void)
                             titleMenu.active = true;
                         }
                     }
-                    // The ESC key to go back is now handled by the "Back" button in settings.c
-                    // if (IsKeyPressed(KEY_ESCAPE))
-                    // {
-                    //     SetGameState(previousGameState); 
-                    //     if (previousGameState == GAME_STATE_TITLE && !titleMenu.active) titleMenu.active = true;
-                    // }
-
                     BeginDrawing();
-                    ClearBackground(RAYWHITE);
+                    ClearBackground(BEIGE);
                     draw_settings(&app_settings);
-                    // DrawText("Press ESC to go back", 10, 10, 20, DARKGRAY); // No longer needed if Back button is primary
                     EndDrawing();
                 }
                 break;
