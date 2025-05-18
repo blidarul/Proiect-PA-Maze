@@ -64,19 +64,17 @@ void RunGameLoop(void)
                 UpdatePlayerMovement(&camera, resources);
 
                 // Calculate player position in grid
-                Vector2 playerPos = { camera.position.x, camera.position.z };
-                int playerCellX = (int)(playerPos.x);
-                int playerCellY = (int)(playerPos.y);
-                    
-                // Handle bounds checking
-                playerCellX = Clamp(playerCellX, 0, resources.cubicmap.width - 1);
-                playerCellY = Clamp(playerCellY, 0, resources.cubicmap.height - 1);
+                int playerPixelX = (int)floorf(camera.position.x);
+                int playerPixelY = (int)floorf(camera.position.z);
+
+                playerPixelX = Clamp(playerPixelX, 0, resources.cubicimage.width - 1);
+                playerPixelY = Clamp(playerPixelY, 0, resources.cubicimage.height - 1);
                      
 
-                VisitCell(maze, playerCellX, playerCellY, &resources);
+                VisitCell(maze, playerPixelX, playerPixelY, &resources);
                 
                 // Render the frame
-                RenderFrame(camera, resources, maze->root, playerCellX, playerCellY);
+                RenderFrame(camera, resources, maze->root, playerPixelX, playerPixelY);
                 break;
                 
             case GAME_STATE_PAUSE:

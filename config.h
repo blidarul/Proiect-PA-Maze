@@ -5,16 +5,15 @@
 #define SCREEN_WIDTH 1600
 #define SCREEN_HEIGHT 900
 
-// Game settings
 #define MAZE_SIZE 20
-#define PLAYER_RADIUS 0.2f
 
 // Mini-map settings
-#define MINIMAP_SCALE 5.0f
+#define MINIMAP_SCALE 7.0f
 #define PLAYER_COLOR RED
 #define MINIMAP_DIST_FROM_BORDER 20.0f
 
-//movement related
+//player related
+#define PLAYER_RADIUS 0.2f
 #define DEFAULT_MOUSE_SENSITIVITY 0.1f
 #define PLAYER_SPEED 2.0f
 #define PLAYER_ACCELERATION 1.8f //For sprinting 
