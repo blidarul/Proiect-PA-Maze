@@ -15,4 +15,5 @@ void RenderFrame(Camera camera, GameResources resources, Root root, int playerCe
 // Draw the minimap UI
 void DrawMinimap(GameResources resources, int playerCellX, int playerCellY);
 
+
 #endif // RENDERER_H

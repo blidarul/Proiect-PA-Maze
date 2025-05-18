@@ -3,6 +3,7 @@
 #include "raygui.h"
 #include "camera.h"
 
+
 void InitializeWindow(int width, int height, const char* title)
 {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
@@ -53,6 +54,9 @@ void RenderFrame(Camera camera, GameResources resources, Root root, int playerCe
     
     // Draw UI elements
     DrawMinimap(resources, playerCellX, playerCellY);
+
+    // Draw Stamina Bar
+   DrawStaminaBar();
 
     EndDrawing();
 }
