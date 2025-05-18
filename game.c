@@ -3,6 +3,7 @@
 #include <time.h>
 #include <stdio.h>
 #include "sound.h"
+#include "title.h" // Make sure title.h is included for app_settings
 
 // Private function prototypes
 static Maze* InitializeMazeData(int height, int width);
@@ -63,22 +64,51 @@ void RunGameLoop(void)
         switch (GetGameState())
         {
             case GAME_STATE_TITLE:
-                update_menu(&titleMenu);
+                {
+                    Menu_Result title_action = update_menu(&titleMenu);
 
-                if (titleMenu.active)
-                {
-                    BeginDrawing();
-                    ClearBackground(RAYWHITE);
-                    draw_menu(&titleMenu);
-                    EndDrawing();
-                }
-                else
-                {
-                    SetGameState(GAME_STATE_GAMEPLAY);
-                    DisableCursor();
+                    if (title_action == MENU_START)
+                    {
+                        SetGameState(GAME_STATE_GAMEPLAY);
+                    }
+                    else if (title_action == MENU_SETTINGS)
+                    {
+                        SetGameState(GAME_STATE_SETTINGS);
+                    }
+                    else if (title_action == MENU_EXIT)
+                    {
+                        CleanupGame();
+                        CloseWindow();
+                    }
+
+                    // Draw the title menu only if we are still in the title state
+                    if (GetGameState() == GAME_STATE_TITLE)
+                    {
+                        BeginDrawing();
+                        ClearBackground(RAYWHITE);
+                        if (titleMenu.active)
+                        {
+                            draw_menu(&titleMenu);
+                        }
+                        EndDrawing();
+                    }
                 }
                 break;
                 
+            case GAME_STATE_SETTINGS:
+                update_settings(&app_settings);
+                if (IsKeyPressed(KEY_ESCAPE))
+                {
+                    SetGameState(GAME_STATE_TITLE);
+                    if (!titleMenu.active) titleMenu.active = true;
+                }
+                BeginDrawing();
+                ClearBackground(RAYWHITE);
+                draw_settings(&app_settings);
+                DrawText("Press ESC to go back", 10, 10, 20, DARKGRAY);
+                EndDrawing();
+                break;
+
             case GAME_STATE_GAMEPLAY:
                 if (IsKeyPressed(KEY_ESCAPE))
                 {
@@ -112,10 +142,9 @@ void RunGameLoop(void)
                 if (pauseAction == MENU_ACTION_RESUME) {
                     SetGameState(GAME_STATE_GAMEPLAY);
                 }
-                else if (pauseAction == MENU_ACTION_RESTART)
+                else if (pauseAction == MENU_ACTION_SETTINGS)
                 {
-                    RestartGameplay();
-                    SetGameState(GAME_STATE_GAMEPLAY);
+                    SetGameState(GAME_STATE_SETTINGS);
                 }
                 else if (pauseAction == MENU_ACTION_EXIT)
                 {
@@ -141,7 +170,6 @@ void RunGameLoop(void)
     }
 }
 
-// Function to re-initialize game-specific elements for a restart
 static void RestartGameplay(void)
 {
     // Unload current game resources
@@ -172,7 +200,7 @@ static void RestartGameplay(void)
     // Reload game resources
     resources = LoadGameResources(maze, mazeHeight, mazeWidth);
 
-    // Reset player/game specific states if any (e.g., score, visited cells if not handled by maze re-init)
+    // Reset player/game specific states if any
     maze->cellsVisited = 0;
 }
 

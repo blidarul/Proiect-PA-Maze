@@ -58,7 +58,7 @@ Menu_action InitializePauseControls(Pause_menu *menu, int screen_width, int scre
     int cy = screen_height / 2;
 
     InitPauseButton(&menu->resume_button,  cx - 100, cy - 120, 200, 40, "RESUME", DARKGRAY, GRAY, WHITE);
-    InitPauseButton(&menu->restart_button, cx - 100, cy - 60,  200, 40, "RESTART", DARKGRAY, GRAY, WHITE);
+    InitPauseButton(&menu->settings_button, cx - 100, cy - 60,  200, 40, "SETTINGS", DARKGRAY, GRAY, WHITE);
     InitPauseButton(&menu->exit_button,    cx - 100, cy + 0,   200, 40, "EXIT", DARKGRAY, GRAY, WHITE);
     
     menu->volume_slider.volume_value = GetCurrentMusicVolume();
@@ -78,10 +78,10 @@ Menu_action UpdatePauseControls(Pause_menu *menu)
         menu->action = MENU_ACTION_RESUME;
     }
 
-    // Restart button
-    if (CheckCollisionPointRec(mouse, menu->restart_button.rect) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    // Settings button
+    if (CheckCollisionPointRec(mouse, menu->settings_button.rect) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
     {
-        menu->action = MENU_ACTION_RESTART;
+        menu->action = MENU_ACTION_SETTINGS;
     }
     
     // Exit button
@@ -119,7 +119,7 @@ void DrawPauseControls(const Pause_menu *menu)
     DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.7f));
 
     DrawSinglePauseButton(&menu->resume_button);
-    DrawSinglePauseButton(&menu->restart_button);
+    DrawSinglePauseButton(&menu->settings_button);
     DrawSinglePauseButton(&menu->exit_button);
     
     DrawSinglePauseSlider(&menu->volume_slider);
