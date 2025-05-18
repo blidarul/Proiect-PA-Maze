@@ -1,4 +1,5 @@
 #include "settings.h"
+#include "raygui.h" // Make sure raygui.h is included if you use GuiButton
 
 void initialize_settings(Settings *settings, int screen_width, int screen_height)
 {
@@ -27,18 +28,16 @@ static float clamp(float value, float min, float max)
     return value;
 }
 
-void update_settings(Settings *settings)
+bool update_settings(Settings *settings)
 {
     Vector2 mouse_pos = GetMousePosition();
 
-    
     float get_slider_value(Rectangle slider) 
     {
         float val = (mouse_pos.x - slider.x) / slider.width;
         return clamp(val, 0.0f, 1.0f);
     }
 
-    
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) 
     {
         if (CheckCollisionPointRec(mouse_pos, settings->volume_slider)) settings->volume_dragging = true;
@@ -53,7 +52,6 @@ void update_settings(Settings *settings)
         settings->charsize_dragging = false;
     }
 
-    
     if (settings->volume_dragging) 
     {
         float val = get_slider_value(settings->volume_slider);
@@ -70,6 +68,16 @@ void update_settings(Settings *settings)
         float val = get_slider_value(settings->charsize_slider);
         settings->character_size = (int)(10 + val * (40 - 10));
     }
+
+    Rectangle backButtonRect = { settings->volume_slider.x, settings->volume_slider.y + 150, settings->volume_slider.width, 40 };
+    bool backButtonPressed = false;
+
+    if (GuiButton(backButtonRect, "Back")) 
+    {
+        backButtonPressed = true;
+    }
+
+    return backButtonPressed;
 }
 
 void draw_settings(const Settings *settings)
@@ -79,17 +87,14 @@ void draw_settings(const Settings *settings)
 
     DrawText("Settings", screen_width / 2 - MeasureText("Settings", fontSize) / 2, 50, fontSize + 10, DARKBLUE);
 
-   
     DrawText("Volume", settings->volume_slider.x, settings->volume_slider.y - 25, fontSize, BLACK);
     DrawText("Sensitivity", settings->sensitivity_slider.x, settings->sensitivity_slider.y - 25, fontSize, BLACK);
     DrawText("Character Size", settings->charsize_slider.x, settings->charsize_slider.y - 25, fontSize, BLACK);
 
-    
     DrawRectangleRec(settings->volume_slider, LIGHTGRAY);
     DrawRectangleRec(settings->sensitivity_slider, LIGHTGRAY);
     DrawRectangleRec(settings->charsize_slider, LIGHTGRAY);
 
-    
     int handle_radius = 10;
 
     int vol_pos = settings->volume_slider.x + (int)(settings->volume * settings->volume_slider.width);
@@ -101,8 +106,11 @@ void draw_settings(const Settings *settings)
     int char_pos = settings->charsize_slider.x + (int)(((settings->character_size - 10) / 30.0f) * settings->charsize_slider.width);
     DrawCircle(char_pos, settings->charsize_slider.y + settings->charsize_slider.height / 2, handle_radius, DARKBLUE);
 
-    
     DrawText(TextFormat("%.2f", settings->volume), settings->volume_slider.x + settings->volume_slider.width + 20, settings->volume_slider.y, fontSize, BLACK);
     DrawText(TextFormat("%.0f", settings->sensitivity), settings->sensitivity_slider.x + settings->sensitivity_slider.width + 20, settings->sensitivity_slider.y, fontSize, BLACK);
     DrawText(TextFormat("%d", settings->character_size), settings->charsize_slider.x + settings->charsize_slider.width + 20, settings->charsize_slider.y, fontSize, BLACK);
+
+    Rectangle backButtonRect = { settings->volume_slider.x, settings->volume_slider.y + 150, settings->volume_slider.width, 40 };
+    DrawRectangleRec(backButtonRect, LIGHTGRAY);
+    DrawText("Back", backButtonRect.x + backButtonRect.width / 2 - MeasureText("Back", fontSize) / 2, backButtonRect.y + backButtonRect.height / 2 - fontSize / 2, fontSize, BLACK);
 }

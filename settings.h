@@ -13,6 +13,7 @@ typedef struct
     Rectangle volume_slider;      
     Rectangle sensitivity_slider;
     Rectangle charsize_slider;
+    Rectangle back_button; // It's good practice to store button rects here too
 
     bool volume_dragging;
     bool sensitivity_dragging;
@@ -21,7 +22,7 @@ typedef struct
 
 void initialize_settings(Settings *settings, int screen_width, int screen_height);
 
-void update_settings(Settings *settings);
+bool update_settings(Settings *settings);
 
 void draw_settings(const Settings *settings);
 
