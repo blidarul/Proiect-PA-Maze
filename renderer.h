@@ -15,4 +15,7 @@ void RenderFrame(Camera camera, GameResources resources, Root root, int playerCe
 // Draw the minimap UI
 void DrawMinimap(GameResources resources, int playerCellX, int playerCellY);
 
+// Draw stamina bar
+void DrawStaminaBar(float currentStamina, float maxStamina);
+
 #endif // RENDERER_H

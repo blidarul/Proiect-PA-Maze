@@ -54,5 +54,8 @@ void RenderFrame(Camera camera, GameResources resources, Root root, int playerCe
     // Draw UI elements
     DrawMinimap(resources, playerCellX, playerCellY);
 
+    // Draw Stamina Bar
+    DrawStaminaBar(100.0f,100.0f);
+
     EndDrawing();
 }

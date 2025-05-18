@@ -20,6 +20,7 @@
 #define PLAYER_FOV 65.0f
 #define PLAYER_HEIGHT 0.5f
 
+
 //sound related
 #define STEP_SOUND_COUNT 4
 #define STEP_COOLDOWN 1.0f / PLAYER_SPEED
