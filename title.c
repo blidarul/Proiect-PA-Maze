@@ -44,9 +44,13 @@ void initialize_menu(Menu *menu, int screen_width, int screen_height)
     menu->exit_button.text_color = BLACK;
 }
 
+Settings *settings;
+
 void update_menu(Menu *menu)
 {
     Vector2 mouse_point = GetMousePosition();
+    int screen_width = GetScreenWidth();
+    int screen_height = GetScreenHeight();
 
     if (CheckCollisionPointRec(mouse_point, menu->start_button.rectangle))
         menu->start_button.bg_color = GRAY;
@@ -72,7 +76,7 @@ void update_menu(Menu *menu)
 
         else if (CheckCollisionPointRec(mouse_point, menu->settings_button.rectangle))
         {
-            menu->active = false;
+            initialize_settings(settings,screen_width,screen_height);
         }
 
         else if (CheckCollisionPointRec(mouse_point, menu->exit_button.rectangle))

@@ -3,6 +3,7 @@
 
 #include<stdbool.h>
 #include "raylib.h"
+#include "settings.h"
 
 typedef enum {
     MENU_NONE,
