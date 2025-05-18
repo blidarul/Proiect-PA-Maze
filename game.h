@@ -10,6 +10,8 @@
 #include "gameState.h"
 #include "raymath.h"
 #include "sound.h"
+static bool isQuestionActive = false; // Tracks if a question is being displayed
+static int currentQuestionIndex = -1; // Stores the index of the current question
 
 // Initialize the game
 void InitGame(void);

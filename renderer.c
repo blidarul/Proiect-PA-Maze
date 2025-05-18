@@ -2,12 +2,11 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 #include "camera.h"
+#include "game.h"
 #include <stdlib.h>
 
 void DrawQuestionWindow(GameResources resources, int random)
 {
-    
-
     // Define the dimensions of the window
     float windowWidth = 600;
     float windowHeight = 400;
@@ -37,11 +36,15 @@ void DrawQuestionWindow(GameResources resources, int random)
         GuiLabel((Rectangle){windowX + padding + buttonWidth + 10, answerY, windowWidth - 2 * padding - buttonWidth - 10, answerHeight}, resources.questions[random].answersText[i]);
 
         // Draw the corresponding button
-        char buttonLabel[2] = {'a' + i, '\0'}; // Generate button labels A, B, C, D
+        char buttonLabel[2] = {'A' + i, '\0'}; // Generate button labels A, B, C, D
         if (GuiButton((Rectangle){windowX + padding, answerY, buttonWidth, buttonHeight}, buttonLabel))
         {
             // Handle button click
             printf("Button %c clicked!\n", 'A' + i);
+
+            // Transition back to gameplay
+            isQuestionActive = false;
+            SetGameState(GAME_STATE_GAMEPLAY);
         }
     }
 }

@@ -14,6 +14,7 @@ static Maze *maze;
 static GameResources resources;
 static const int mazeWidth = MAZE_SIZE;
 static const int mazeHeight = MAZE_SIZE;
+static RenderTexture2D lastFrameTexture;
 
 void InitGame(void)
 {
@@ -40,6 +41,9 @@ void InitGame(void)
 
     // Load game resources
     resources = LoadGameResources(maze, mazeHeight, mazeWidth);
+
+    // Initialize the render texture for capturing the last frame
+    lastFrameTexture = LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     // Set cursor constraints
     DisableCursor();
@@ -74,17 +78,43 @@ void RunGameLoop(void)
             playerCellY = Clamp(playerCellY, 0, resources.cubicmap.height - 1);
 
             VisitCell(maze, playerCellX, playerCellY, &resources);
+
+            // Check if a question should be triggered
+            if (maze->cellsVisited % 20 == 0 && maze->cellsVisited > 0 && !isQuestionActive)
+            {
+                // Capture the last frame
+                BeginTextureMode(lastFrameTexture);
+                ClearBackground(RAYWHITE);
+                RenderFrame(camera, resources, maze->root, playerCellX, playerCellY, maze->cellsVisited);
+                EndTextureMode();
+
+                // Trigger question pop-up
+                isQuestionActive = true;
+                currentQuestionIndex = rand() % 60; // Randomize question index
+                SetGameState(GAME_STATE_QUESTION);
+            }
+
             UpdateStepSounds();
-            // Render the frame
-            
             RenderFrame(camera, resources, maze->root, playerCellX, playerCellY, maze->cellsVisited);
+            break;
+
+        case GAME_STATE_QUESTION:
+            // Display the question window
+            BeginDrawing();
+            ClearBackground(RAYWHITE);
+
+            // Draw the last frame as the background
+            DrawTextureRec(lastFrameTexture.texture, 
+                           (Rectangle){0, 0, lastFrameTexture.texture.width, -lastFrameTexture.texture.height}, 
+                           (Vector2){0, 0}, WHITE);
+
+            // Draw the question window
+            DrawQuestionWindow(resources, currentQuestionIndex);
+            EndDrawing();
             break;
 
         case GAME_STATE_PAUSE:
             // Handle pause state
-            break;
-        case GAME_STATE_QUESTION:
-
             break;
         }
 
@@ -96,6 +126,9 @@ void CleanupGame(void)
 {
     // Cleanup resources
     CleanupResources(&resources, maze, mazeHeight);
+
+    // Unload the render texture
+    UnloadRenderTexture(lastFrameTexture);
 
     // Clean up loaded sounds
     UnloadStepSounds();
