@@ -7,8 +7,8 @@
 #include "raygui.h"
 void LoadQuestions(Question *questions)
 {
-    FILE *questionText = fopen("resources/Questions.txt", "r");
-    FILE *answerText = fopen("resources/Answers.txt", "r");
+    FILE *questionText = fopen("resources/Q_A/Questions.txt", "r");
+    FILE *answerText = fopen("resources/Q_A/Answers.txt", "r");
     char buffer[1024];
     int i = 0, j, index;
     while (fgets(buffer, QUESTION_SIZE, questionText))
