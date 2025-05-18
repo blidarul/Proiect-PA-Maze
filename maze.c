@@ -209,22 +209,22 @@ Image ConvertMazeToCubicMap(Maze *maze, int height, int width)
             // Make the cell itself black in the cubic map
             ImageDrawPixel(&cubicmap, cellX, cellY, BLACK);
 
-            if (north == 1)
+            if (north != NO_PATH) 
             {
                 ImageDrawPixel(&cubicmap, cellX, cellY - 1, BLACK);
             }
 
-            if (west == 1)
+            if (west != NO_PATH)
             {
                 ImageDrawPixel(&cubicmap, cellX - 1, cellY, BLACK);
             }
 
-            if(east == 1)
+            if(east != NO_PATH)
             {
                 ImageDrawPixel(&cubicmap, cellX + 1, cellY, BLACK);
             }
 
-            if(south == 1)
+            if(south != NO_PATH)
             {
                 ImageDrawPixel(&cubicmap, cellX, cellY + 1, BLACK);
             }
