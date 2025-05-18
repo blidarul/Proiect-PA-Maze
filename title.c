@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+Settings app_settings;
 
 void initialize_menu(Menu *menu, int screen_width, int screen_height)
 {
@@ -44,13 +45,12 @@ void initialize_menu(Menu *menu, int screen_width, int screen_height)
     menu->exit_button.text_color = BLACK;
 }
 
-Settings *settings;
-
-void update_menu(Menu *menu)
+Menu_Result update_menu(Menu *menu)
 {
     Vector2 mouse_point = GetMousePosition();
     int screen_width = GetScreenWidth();
     int screen_height = GetScreenHeight();
+    Menu_Result result = MENU_NONE;
 
     if (CheckCollisionPointRec(mouse_point, menu->start_button.rectangle))
         menu->start_button.bg_color = GRAY;
@@ -72,19 +72,19 @@ void update_menu(Menu *menu)
         if (CheckCollisionPointRec(mouse_point, menu->start_button.rectangle))
         {
             menu->active = false;  
+            result = MENU_START;
         }
-
         else if (CheckCollisionPointRec(mouse_point, menu->settings_button.rectangle))
         {
-            initialize_settings(settings,screen_width,screen_height);
+            initialize_settings(&app_settings, screen_width, screen_height); 
+            result = MENU_SETTINGS;
         }
-
         else if (CheckCollisionPointRec(mouse_point, menu->exit_button.rectangle))
         {
-            CloseWindow();
-            exit(0);
+            result = MENU_EXIT;
         }
     }
+    return result;
 }
 
 void draw_menu(const Menu *menu)
