@@ -1,6 +1,8 @@
 #ifndef QUESTIONS_H
 #define QUESTIONS_H
 #define QUESTION_SIZE 200
+#include "raylib.h"
+
 typedef struct {
     char questionText[QUESTION_SIZE];
     char answers[3];
@@ -8,5 +10,5 @@ typedef struct {
 } Question;
 
 void LoadQuestions(Question *questions);
-void DrawQuestionWindow(Question *questions, int random);
+void DrawQuestionWindow(Question *questions, int random, Sound correctAnswerSound, Sound incorrectAnswerSound);
 #endif

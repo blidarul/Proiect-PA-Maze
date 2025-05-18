@@ -26,6 +26,9 @@ static const float questionInterval = 10.0f; // Time interval (in seconds) for q
 static RenderTexture2D lastFrameTexture; // RenderTexture to store the last 3D frame
 bool isQuestionActive = false; // Tracks the number of questions answered
 static int currentQuestionIndex = -1; // Stores the index of the current question
+static Sound questionPopupSound; // Added for the question pop-up sound
+static Sound correctAnswerSound;   // Sound for correct answer
+static Sound incorrectAnswerSound; // Sound for incorrect answer
 
 static GameState previousGameState; // Added to store the state before settings
 
@@ -39,8 +42,11 @@ void InitGame(void)
     InitAudioDevice();
     InitStepSounds("resources/Sound");
 
-    // Initialize music
+    // Initialize music & sounds
     InitBGM("resources/Sound/music.wav");
+    questionPopupSound = LoadSound("resources/Sound/question_pop-up.wav"); // Load the question pop-up sound
+    correctAnswerSound = LoadSound("resources/Sound/correct_answer.wav");     // Load correct answer sound
+    incorrectAnswerSound = LoadSound("resources/Sound/wrong_answer.wav"); // Load incorrect answer sound
 
     // Initialize game state system
     InitGameState();
@@ -153,6 +159,7 @@ void RunGameLoop(void)
                     questionTimer += GetFrameTime();
                     if (questionTimer >= questionInterval)
                     {
+                        PlaySound(questionPopupSound); // Play the sound
                         // Capture the last frame
                         BeginTextureMode(lastFrameTexture);
                         ClearBackground(DARKBLUE);
@@ -213,8 +220,8 @@ void RunGameLoop(void)
                                (Rectangle){0, 0, (float)lastFrameTexture.texture.width, (float)-lastFrameTexture.texture.height},
                                (Vector2){0, 0}, WHITE);
 
-                // Draw the question window
-                DrawQuestionWindow(resources.questions, currentQuestionIndex); // Use the stored question index
+                // Draw the question window and handle answer logic
+                DrawQuestionWindow(resources.questions, currentQuestionIndex, correctAnswerSound, incorrectAnswerSound); 
                 EndDrawing();
                 break;
         }
@@ -233,6 +240,9 @@ void CleanupGame(void)
 
     UnloadStepSounds();     
     UnloadBGM();
+    UnloadSound(questionPopupSound); // Unload the question pop-up sound
+    UnloadSound(correctAnswerSound);   // Unload correct answer sound
+    UnloadSound(incorrectAnswerSound); // Unload incorrect answer sound
     CloseAudioDevice();
 
     // Unload the render texture
