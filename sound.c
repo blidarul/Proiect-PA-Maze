@@ -1,28 +1,44 @@
 #include "sound.h"
 #include <stdio.h>
 #include "raylib.h"
+#include "config.h"
 
 static Sound steps[STEP_SOUND_COUNT];
 static float stepTimer = 0.0f;
 static int currentStep = 0;
 
 static Music bgm;
+static float currentBgmVolume = 0.5f;
 
 void InitBGM(const char *musicPath)
 {
     bgm = LoadMusicStream(musicPath);
     PlayMusicStream(bgm);
+    SetMusicVolume(bgm, currentBgmVolume);
 }
 
-void UpdateBGM()
+void UpdateBGM(void)
 {
     UpdateMusicStream(bgm);
 }
 
-void UnloadBGM()
+void UnloadBGM(void)
 {
     StopMusicStream(bgm);
     UnloadMusicStream(bgm);
+}
+
+void SetCurrentMusicVolume(float volume)
+{
+    if (volume < 0.0f) volume = 0.0f;
+    if (volume > 1.0f) volume = 1.0f;
+    currentBgmVolume = volume;
+    SetMusicVolume(bgm, currentBgmVolume);
+}
+
+float GetCurrentMusicVolume(void)
+{
+    return currentBgmVolume;
 }
 
 void InitStepSounds(const char *directory)

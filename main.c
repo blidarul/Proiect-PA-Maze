@@ -1,5 +1,6 @@
 #include "game.h"
-
+#include "pause.h"
+#include "title.h"
 
 int main(void)
 {

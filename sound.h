@@ -1,13 +1,16 @@
 #ifndef SOUND_H
 #define SOUND_H
 
-#include "config.h"
+#include "raylib.h"
+
+void InitBGM(const char *musicPath);
+void UpdateBGM(void);
+void UnloadBGM(void);
+void SetCurrentMusicVolume(float volume);
+float GetCurrentMusicVolume(void);
 
 void InitStepSounds(const char *directory);
-void UpdateStepSounds();
-void UnloadStepSounds();
-void InitBGM(const char *musicPath);
-void UpdateBGM();
-void UnloadBGM();
+void UpdateStepSounds(void);
+void UnloadStepSounds(void);
 
 #endif
