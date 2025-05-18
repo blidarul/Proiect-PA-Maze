@@ -35,10 +35,6 @@ void DrawMinimap(GameResources resources, int playerCellX, int playerCellY)
 
 void RenderFrame(Camera camera, GameResources resources, Root root, int playerCellX, int playerCellY, bool isPausedBackground)
 {
-    BeginDrawing();
-    
-    ClearBackground(RAYWHITE);
-    
     // Draw 3D scene
     BeginMode3D(camera);
         DrawModel(resources.model, (Vector3) {0.5f, 0.0f, 0.5f}, 1.0f, WHITE);
@@ -51,6 +47,4 @@ void RenderFrame(Camera camera, GameResources resources, Root root, int playerCe
     { 
         DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.5f)); 
     }
-
-    EndDrawing();
 }
