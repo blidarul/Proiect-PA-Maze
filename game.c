@@ -24,6 +24,7 @@ void InitGame(void)
 {
     // Initialize window
     InitializeWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "maze");
+    SetExitKey(KEY_NULL);
     
     // Initialize audio device
     InitAudioDevice();
@@ -100,10 +101,12 @@ void RunGameLoop(void)
                 break;
                 
             case GAME_STATE_PAUSE:
-                Menu_action pauseAction = UpdatePauseControls(&pauseMenu);
-
-                if (pauseAction == MENU_ACTION_RESUME)
-                {
+                // Handle pause menu updates and drawing
+                UpdatePauseControls(&pauseMenu); // Example call
+                
+                // Determine action from pause menu
+                Menu_action pauseAction = pauseMenu.action; // Assuming 'action' is updated by UpdatePauseControls
+                if (pauseAction == MENU_ACTION_RESUME) {
                     SetGameState(GAME_STATE_GAMEPLAY);
                 }
                 else if (pauseAction == MENU_ACTION_RESTART)
