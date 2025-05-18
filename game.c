@@ -8,7 +8,6 @@
 // Private function prototypes
 static Maze* InitializeMazeData(int height, int width);
 static void VisitCell(Maze *maze, int playerCellX, int playerCellY, GameResources *resources);
-static void RestartGameplay(void);
 
 // Game state variables
 static Camera camera;
@@ -205,40 +204,6 @@ void RunGameLoop(void)
                 break;
         }
     }
-}
-
-static void RestartGameplay(void)
-{
-    // Unload current game resources
-    UnloadGameResources(&resources);
-
-    for (int i = 0; i < mazeHeight; i++)
-    {
-        if (maze->path[i] != NULL)
-        {
-            free(maze->path[i]);
-        }
-    }
-    if (maze->path != NULL) free(maze->path);
-    if (maze != NULL) free(maze);
-
-    // Re-initialize camera
-    camera = InitializeCamera();
-    
-    // Re-initialize maze
-    maze = InitializeMazeData(mazeHeight, mazeWidth);
-    if (maze == NULL)
-    {
-        fprintf(stderr, "Memory allocation failed for maze on restart.\n");
-        CloseWindow();
-        exit(EXIT_FAILURE);
-    }
-    
-    // Reload game resources
-    resources = LoadGameResources(maze, mazeHeight, mazeWidth);
-
-    // Reset player/game specific states if any
-    maze->cellsVisited = 0;
 }
 
 void CleanupGame(void)
