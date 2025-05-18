@@ -10,7 +10,7 @@ void initialize_menu(Menu *menu, int screen_width, int screen_height)
     menu->start_button.rectangle = (Rectangle)
     {
         screen_width/2 - 100,
-        screen_height/2 - 60,
+        screen_height/2 - 100,
         200,
         50
     };
@@ -22,7 +22,7 @@ void initialize_menu(Menu *menu, int screen_width, int screen_height)
     menu->settings_button.rectangle = (Rectangle)
     {
     screen_width/2 - 100,
-    screen_height/2 - 20,  
+    screen_height/2 + 0,  
     200,
     50
     };
@@ -34,7 +34,7 @@ void initialize_menu(Menu *menu, int screen_width, int screen_height)
     menu->exit_button.rectangle = (Rectangle)
     {
         screen_width/2 - 100,
-        screen_height/2 + 20,
+        screen_height/2 + 100,
         200,
         50
     };
