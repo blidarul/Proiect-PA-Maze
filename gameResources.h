@@ -3,6 +3,7 @@
 #define MAX_QUESTION_SIZE 200
 #include "raylib.h"
 #include "maze.h"
+#include "questions.h"
 
 // Structure to hold game resources
 typedef struct
@@ -15,6 +16,7 @@ typedef struct
     Color *mapPixels;
     Image minimap;
     Image cubicimage;
+    Question questions[60];
 } GameResources;
 
 // Load all game resources

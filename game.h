@@ -15,6 +15,7 @@
 #include "pause.h"
 #include "title.h"
 
+extern bool isQuestionActive; // Declare the variable as extern
 
 // Initialize the game
 void InitGame(void);

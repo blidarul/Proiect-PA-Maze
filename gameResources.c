@@ -5,6 +5,7 @@
 GameResources LoadGameResources(Maze *maze, int mazeGridHeight, int mazeGridWidth)
 {
     GameResources resources = { 0 };
+    LoadQuestions(resources.questions);
 
     // Calculate minimap dimensions based on maze grid dimensions
     const int minimapImageWidth = mazeGridWidth * 2 + 1;

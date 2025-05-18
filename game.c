@@ -3,6 +3,7 @@
 #include <time.h>
 #include <stdio.h>
 #include "sound.h"
+#include "questions.h"
 
 // Private function prototypes
 static Maze* InitializeMazeData(int height, int width);
@@ -19,6 +20,13 @@ static const int mazeHeight = MAZE_SIZE;
 // Menu structures
 static Menu titleMenu;
 static Pause_menu pauseMenu;
+
+// Question state variables
+static float questionTimer = 0.0f; // Timer to track elapsed time
+static const float questionInterval = 10.0f; // Time interval (in seconds) for question pop-up
+static RenderTexture2D lastFrameTexture; // RenderTexture to store the last 3D frame
+bool isQuestionActive = false; // Tracks the number of questions answered
+static int currentQuestionIndex = -1; // Stores the index of the current question
 
 void InitGame(void)
 {
@@ -49,7 +57,10 @@ void InitGame(void)
         exit(EXIT_FAILURE);
     }
     resources = LoadGameResources(maze, mazeHeight, mazeWidth);
-    
+
+    // Initialize the render texture for capturing the last frame
+    lastFrameTexture = LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);
+
     SetGameState(GAME_STATE_TITLE);
 }
 
@@ -78,7 +89,7 @@ void RunGameLoop(void)
                     DisableCursor();
                 }
                 break;
-                
+
             case GAME_STATE_GAMEPLAY:
                 if (IsKeyPressed(KEY_ESCAPE))
                 {
@@ -95,21 +106,40 @@ void RunGameLoop(void)
 
                     playerPixelX = Clamp(playerPixelX, 0, resources.cubicimage.width - 1);
                     playerPixelY = Clamp(playerPixelY, 0, resources.cubicimage.height - 1);
-                         
+
                     VisitCell(maze, playerPixelX, playerPixelY, &resources);
-                    
+
+                    // Update the question timer
+                    questionTimer += GetFrameTime();
+                    if (questionTimer >= questionInterval)
+                    {
+                        // Capture the last frame
+                        BeginTextureMode(lastFrameTexture);
+                        ClearBackground(DARKBLUE);
+                        RenderFrame(camera, resources, maze->root, playerPixelX, playerPixelY, false);
+                        EndTextureMode();
+
+                        // Randomize the question index
+                        currentQuestionIndex = rand() % 60; // Randomize question index
+
+                        // Transition to the question gamestate
+                        questionTimer = 0.0f; // Reset the timer
+                        SetGameState(GAME_STATE_QUESTION);
+                    }
+
                     BeginDrawing();
                     ClearBackground(DARKBLUE);
                     RenderFrame(camera, resources, maze->root, playerPixelX, playerPixelY, false);
                     EndDrawing();
                 }
                 break;
-                
+
             case GAME_STATE_PAUSE:
-                UpdatePauseControls(&pauseMenu); 
-                
-                Menu_action pauseAction = pauseMenu.action; 
-                if (pauseAction == MENU_ACTION_RESUME) {
+                UpdatePauseControls(&pauseMenu);
+
+                Menu_action pauseAction = pauseMenu.action;
+                if (pauseAction == MENU_ACTION_RESUME)
+                {
                     SetGameState(GAME_STATE_GAMEPLAY);
                 }
                 else if (pauseAction == MENU_ACTION_RESTART)
@@ -121,11 +151,11 @@ void RunGameLoop(void)
                 {
                     CloseWindow();
                 }
-                
+
                 BeginDrawing();
                 ClearBackground(RAYWHITE);
-                RenderFrame(camera, resources, maze->root, 
-                            (int)(camera.position.x), (int)(camera.position.z), 
+                RenderFrame(camera, resources, maze->root,
+                            (int)(camera.position.x), (int)(camera.position.z),
                             true);
                 DrawPauseControls(&pauseMenu);
                 EndDrawing();
@@ -134,7 +164,14 @@ void RunGameLoop(void)
             case GAME_STATE_QUESTION:
                 BeginDrawing();
                 ClearBackground(RAYWHITE);
-                DrawText("Question State - Not Implemented", 20, 20, 20, DARKGRAY);
+
+                // Draw the last frame as the background
+                DrawTextureRec(lastFrameTexture.texture,
+                               (Rectangle){0, 0, lastFrameTexture.texture.width, -lastFrameTexture.texture.height},
+                               (Vector2){0, 0}, WHITE);
+
+                // Draw the question window
+                DrawQuestionWindow(resources.questions, currentQuestionIndex); // Use the stored question index
                 EndDrawing();
                 break;
         }
@@ -187,6 +224,9 @@ void CleanupGame(void)
     UnloadStepSounds();     
     UnloadBGM();
     CloseAudioDevice();
+
+    // Unload the render texture
+    UnloadRenderTexture(lastFrameTexture);
 }
 
 static Maze* InitializeMazeData(int height, int width)
