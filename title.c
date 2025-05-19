@@ -87,6 +87,10 @@ void draw_menu(const Menu *menu)
     int headerFontSize = 40; // Increased font size
     Color headerColor = DARKBLUE; // Or another color like GOLD, MAROON
 
+    const char *faculty = "Polytehnic University of Bucharest";
+    const char *proffesor = "Proffersors: Caramihai Dan-Mihail, Chis Daniel-Ioan";
+    const char *contributors = "Contributors: Blidaru Andrei-Eduard, Chiriac Mihai-Ciprian, Solca Andrei-Rares, Stan Dragos-Ioan, Matei Radu-Stefan, Delea Robert-Stelian";
+
     int header_w = MeasureText(header, headerFontSize);
     DrawText(header,
              GetScreenWidth()/2 - header_w/2,
@@ -138,6 +142,34 @@ void draw_menu(const Menu *menu)
     // Exit Button
     bool exitHovered = CheckCollisionPointRec(mousePoint, menu->exit_button.rectangle);
     DrawEnhancedButton(&menu->exit_button, exitHovered);
+
+    //draw credentials
+    int screen_width = GetScreenWidth();
+    int screen_height = GetScreenHeight();
+    int current_y_offset = screen_height - 100; // Start drawing from the bottom up
+
+    int faculty_w = MeasureText(faculty, 20);
+    DrawText(faculty,
+             screen_width / 2 - faculty_w / 2,
+             current_y_offset,
+             20,
+             BLACK);
+    current_y_offset += 25; // Move up for the next line
+
+    int proffesor_w = MeasureText(proffesor, 20);
+    DrawText(proffesor,
+             screen_width / 2 - proffesor_w / 2,
+             current_y_offset,
+             20,
+             BLACK);
+    current_y_offset += 25;
+
+    int contributors_w = MeasureText(contributors, 15); // Smaller font for potentially long text
+    DrawText(contributors,
+             screen_width / 2 - contributors_w / 2,
+             current_y_offset,
+             15, // Smaller font size
+             BLACK);
 }
 
 void unload_menu(Menu *menu)
