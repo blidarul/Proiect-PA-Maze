@@ -21,7 +21,6 @@ Maze game for the "Algorithm Design" hackathon
 ### Immediate priority 
 
 ### Secondary priority
-* Make it so correct question reward doesn't overlap win cell
 * Play win sound when you win (lol)
 
 

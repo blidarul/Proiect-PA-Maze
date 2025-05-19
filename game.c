@@ -30,6 +30,7 @@ static int currentQuestionIndex = -1; // Stores the index of the current questio
 static Sound questionPopupSound; // Added for the question pop-up sound
 static Sound correctAnswerSound;   // Sound for correct answer
 static Sound incorrectAnswerSound; // Sound for incorrect answer
+static Sound winSound;
 
 static GameState previousGameState; // Added to store the state before settings
 
@@ -48,6 +49,7 @@ void InitGame(void)
     questionPopupSound = LoadSound("resources/Sound/question_pop-up.wav"); // Load the question pop-up sound
     correctAnswerSound = LoadSound("resources/Sound/correct_answer.wav");     // Load correct answer sound
     incorrectAnswerSound = LoadSound("resources/Sound/wrong_answer.wav"); // Load incorrect answer sound
+    winSound = LoadSound("resources/Sound/win_sound.wav");
 
     // Initialize game state system
     InitGameState();
@@ -160,6 +162,7 @@ void RunGameLoop(void)
                     if (playerPixelX == (mazeWidth*2-1) && playerPixelY == (mazeHeight*2-1))
                     {
                         SetGameState(GAME_STATE_WIN);
+                        PlaySound(winSound);
                     }
                     // --- End of WIN CONDITION check ---
 
