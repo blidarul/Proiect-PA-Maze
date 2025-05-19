@@ -1,6 +1,8 @@
 #include "gameResources.h"
 #include <stdio.h>
 #include <string.h>
+#include "types.h"
+#include "questions.h"
 
 GameResources LoadGameResources(Maze *maze, int mazeGridHeight, int mazeGridWidth)
 {

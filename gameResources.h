@@ -19,7 +19,7 @@ struct GameResources {
 };
 
 // Function declarations
-GameResources LoadGameResources(Maze *maze, int height, int width);
+GameResources LoadGameResources(Maze *maze, int mazeGridHeight, int mazeGridWidth);
 void UnloadGameResources(GameResources* resources);
 void CleanupResources(GameResources* resources, Maze *maze, int height);
 void UpdateMinimapTexture(GameResources* resources);
