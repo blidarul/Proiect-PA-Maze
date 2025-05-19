@@ -194,7 +194,16 @@ Vector3 HandleCollisions(Camera *camera, Vector3 localMovement, GameResources re
 
 void DrawStaminaBar()
 {
+    // Store the original color of the progress bar's filled part
+    Color originalColor = GetColor(GuiGetStyle(PROGRESSBAR, BASE_COLOR_PRESSED));
+
+    // Set the progress bar's filled part color to yellow
+    GuiSetStyle(PROGRESSBAR, BASE_COLOR_PRESSED, ColorToInt(GREEN));
+
     GuiProgressBar(bounds, NULL, NULL, &currentStamina, 0.0f, MAX_STAMINA);
+
+    // Restore the original color so other progress bars are not affected
+    GuiSetStyle(PROGRESSBAR, BASE_COLOR_PRESSED, ColorToInt(originalColor));
 }
 
 void UpdatePlayerMovement(Camera *camera, GameResources resources)
