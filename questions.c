@@ -170,10 +170,8 @@ void DrawQuestionWindow(Question *questions, int random, Sound correctAnswerSoun
                 
                 // Calculate win position (bottom-right corner of the maze)
                 // The maze dimensions are typically based on the cubicimage dimensions
-                int mazeWidth = resources->cubicimage.width;
-                int mazeHeight = resources->cubicimage.height;
-                int exitX = mazeWidth - 1;  // Right-most cell
-                int exitY = mazeHeight - 1; // Bottom-most cell
+                int exitX = (MAZE_SIZE - 1) * 2 + 1;
+                int exitY = (MAZE_SIZE - 1) * 2 + 1;
                 
                 // Reveal several new rows (going up from the bottom)
                 for(int y = lastRevealedRow; y > lastRevealedRow - rowsToReveal && y >= 0; y--)
