@@ -18,16 +18,10 @@ Maze game for the "Algorithm Design" hackathon
 
 ## TODO list
 
-### Immediate priority
-* Handle weird camera movement when moving forward/backwards into a corner
-* Add question/educational mechanisms
-* Implement main menu functionality
-* Implement configuration options 
+### Immediate priority 
 
 ### Secondary priority
-* Implement question text
-* Change placeholder textures
-* Implementing audio (ambient sounds, music)
+* Make it so correct question reward doesn't overlap win cell
 
 
 ## Credits
