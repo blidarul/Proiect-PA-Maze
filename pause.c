@@ -43,10 +43,15 @@ Menu_action InitializePauseControls(Pause_menu *menu, int screen_width, int scre
 
     int cx = screen_width / 2;
     int cy = screen_height / 2;
+    int button_width = 200;
+    int button_height = 40;
+    int button_y_start = cy - 120; // Adjusted for 4 buttons
+    int button_spacing = 60;       // 40px height + 20px gap
 
-    InitPauseButton(&menu->resume_button,  cx - 100, cy - 100, 200, 40, "RESUME", DARKGRAY, GRAY, WHITE);
-    InitPauseButton(&menu->settings_button, cx - 100, cy - 40,  200, 40, "SETTINGS", DARKGRAY, GRAY, WHITE);
-    InitPauseButton(&menu->exit_button,    cx - 100, cy + 20,   200, 40, "EXIT", DARKGRAY, GRAY, WHITE);
+    InitPauseButton(&menu->resume_button,  cx - button_width/2, button_y_start, button_width, button_height, "RESUME", DARKGRAY, GRAY, WHITE);
+    InitPauseButton(&menu->settings_button, cx - button_width/2, button_y_start + button_spacing,  button_width, button_height, "SETTINGS", DARKGRAY, GRAY, WHITE);
+    InitPauseButton(&menu->help_button,    cx - button_width/2, button_y_start + 2 * button_spacing, button_width, button_height, "HELP", DARKGRAY, GRAY, WHITE); // New Help Button
+    InitPauseButton(&menu->exit_button,    cx - button_width/2, button_y_start + 3 * button_spacing,   button_width, button_height, "EXIT", DARKGRAY, GRAY, WHITE);
     
     return menu->action;
 }
@@ -56,24 +61,25 @@ Menu_action UpdatePauseControls(Pause_menu *menu)
     menu->action = MENU_ACTION_NONE;
     Vector2 mouse = GetMousePosition();
 
-    // Resume button
-    if (CheckCollisionPointRec(mouse, menu->resume_button.rect) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) // Check for mouse press once
     {
-        menu->action = MENU_ACTION_RESUME;
+        if (CheckCollisionPointRec(mouse, menu->resume_button.rect))
+        {
+            menu->action = MENU_ACTION_RESUME;
+        }
+        else if (CheckCollisionPointRec(mouse, menu->settings_button.rect))
+        {
+            menu->action = MENU_ACTION_SETTINGS;
+        }
+        else if (CheckCollisionPointRec(mouse, menu->help_button.rect)) // Handle Help Button
+        {
+            menu->action = MENU_ACTION_SHOW_HELP;
+        }
+        else if (CheckCollisionPointRec(mouse, menu->exit_button.rect))
+        {
+            menu->action = MENU_ACTION_EXIT;
+        }
     }
-
-    // Settings button
-    if (CheckCollisionPointRec(mouse, menu->settings_button.rect) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-    {
-        menu->action = MENU_ACTION_SETTINGS;
-    }
-    
-    // Exit button
-    if (CheckCollisionPointRec(mouse, menu->exit_button.rect) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-    {
-        menu->action = MENU_ACTION_EXIT;
-    }
-
     return menu->action;
 }
 
@@ -83,6 +89,7 @@ void DrawPauseControls(const Pause_menu *menu)
 
     DrawSinglePauseButton(&menu->resume_button);
     DrawSinglePauseButton(&menu->settings_button);
+    DrawSinglePauseButton(&menu->help_button); // Draw Help Button
     DrawSinglePauseButton(&menu->exit_button);
 
     const char* pausedText = "PAUSED";

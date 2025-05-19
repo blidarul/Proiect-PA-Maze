@@ -11,7 +11,8 @@ typedef enum {
     MENU_NONE,
     MENU_START,
     MENU_SETTINGS,
-    MENU_EXIT
+    MENU_EXIT,
+    MENU_SHOW_HELP
 } Menu_Result;
 
 typedef struct
@@ -27,6 +28,7 @@ typedef struct Menu
     bool active;
     Button start_button;
     Button settings_button;
+    Button help_button;    // Add this
     Button exit_button;
 }Menu;
 
@@ -34,5 +36,8 @@ void initialize_menu(Menu *menu, int screen_width, int screen_height);
 Menu_Result update_menu(Menu *menu);
 void draw_menu(const Menu *menu);
 void unload_menu(Menu *menu);
+
+// Add declaration for the new draw_help_screen function
+void draw_help_screen(void);
 
 #endif

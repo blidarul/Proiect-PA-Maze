@@ -7,7 +7,8 @@ typedef enum {
     GAME_STATE_PAUSE,
     GAME_STATE_SETTINGS,
     GAME_STATE_QUESTION,
-    GAME_STATE_WIN // New win state
+    GAME_STATE_WIN,
+    GAME_STATE_HELP
 } GameState;
 
 GameState GetGameState(void);

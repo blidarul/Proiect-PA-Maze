@@ -9,6 +9,7 @@ typedef enum
     MENU_ACTION_NONE = 0,
     MENU_ACTION_RESUME,
     MENU_ACTION_SETTINGS,
+    MENU_ACTION_SHOW_HELP, // Add this
     MENU_ACTION_EXIT
 } Menu_action;
 
@@ -31,10 +32,11 @@ typedef struct
 
 typedef struct
 {
-    bool active;
     PauseButton resume_button;
     PauseButton settings_button;
+    PauseButton help_button;
     PauseButton exit_button;
+    bool active;
     Menu_action action;
 } Pause_menu;
 

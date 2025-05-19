@@ -5,6 +5,7 @@
 #include "sound.h"
 #include "questions.h"
 #include "config.h"
+#include "title.h" // Make sure title.h is included for draw_help_screen
 
 // Private function prototypes
 static Maze* InitializeMazeData(int height, int width);
@@ -98,6 +99,11 @@ void RunGameLoop(void)
                         previousGameState = GAME_STATE_TITLE; // Store current state
                         SetGameState(GAME_STATE_SETTINGS);
                     }
+                    else if (title_action == MENU_SHOW_HELP) // Handle Show Help
+                    {
+                        previousGameState = GAME_STATE_TITLE;
+                        SetGameState(GAME_STATE_HELP);
+                    }
                     else if (title_action == MENU_EXIT)
                     {
                         CleanupGame();
@@ -137,7 +143,6 @@ void RunGameLoop(void)
                     EndDrawing();
                 }
                 break;
-
 
             case GAME_STATE_GAMEPLAY:
                 if (IsKeyPressed(KEY_ESCAPE))
@@ -194,8 +199,8 @@ void RunGameLoop(void)
                 break;
 
             case GAME_STATE_PAUSE:
-                { // Added braces for scope
-                    Menu_action pauseAction = UpdatePauseControls(&pauseMenu); // UpdatePauseControls should return the action
+                {
+                    Menu_action pauseAction = UpdatePauseControls(&pauseMenu);
 
                     if (pauseAction == MENU_ACTION_RESUME)
                     {
@@ -203,23 +208,31 @@ void RunGameLoop(void)
                     }
                     else if (pauseAction == MENU_ACTION_SETTINGS)
                     {
-                        previousGameState = GAME_STATE_PAUSE; // Store current state
+                        previousGameState = GAME_STATE_PAUSE;
                         SetGameState(GAME_STATE_SETTINGS);
+                    }
+                    else if (pauseAction == MENU_ACTION_SHOW_HELP) // Handle Show Help from Pause
+                    {
+                        previousGameState = GAME_STATE_PAUSE;
+                        SetGameState(GAME_STATE_HELP);
                     }
                     else if (pauseAction == MENU_ACTION_EXIT)
                     {
-                        CleanupGame(); // Ensure cleanup before closing
+                        CleanupGame();
                         CloseWindow();
                         return; // Exit RunGameLoop after cleanup
                     }
 
-                    BeginDrawing();
-                    ClearBackground(RAYWHITE); // Or draw the game screen blurred
-                    RenderFrame(camera, resources, maze->root,
-                                (int)(camera.position.x), (int)(camera.position.z),
-                                true); // Assuming true means draw blurred or dimmed for pause
-                    DrawPauseControls(&pauseMenu);
-                    EndDrawing();
+                    // Only draw pause menu if still in pause state
+                    if (GetGameState() == GAME_STATE_PAUSE)
+                    {
+                        BeginDrawing();
+                        RenderFrame(camera, resources, maze->root,
+                                    (int)(camera.position.x), (int)(camera.position.z),
+                                    true); 
+                        DrawPauseControls(&pauseMenu);
+                        EndDrawing();
+                    }
                 }
                 break;
 
@@ -241,17 +254,12 @@ void RunGameLoop(void)
                 {
                     if (IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
                     {
-                        // Reset game or relevant parts before going to title
-                        // For example, re-initialize maze and player position if needed for a new game
-                        // This might involve calling parts of InitGame() or a dedicated ResetGame() function.
-                        // For now, just go back to title.
                         SetGameState(GAME_STATE_TITLE);
-                        // Ensure title menu is active
                         if (!titleMenu.active) titleMenu.active = true; 
                     }
 
                     BeginDrawing();
-                    ClearBackground(BEIGE); // Or any color you like for the win screen
+                    ClearBackground(BEIGE);
 
                     const char* winText = "YOU WIN!";
                     int winTextWidth = MeasureText(winText, 60);
@@ -264,9 +272,24 @@ void RunGameLoop(void)
                     EndDrawing();
                 }
                 break;
+
+            case GAME_STATE_HELP: // New state for Help Screen
+                {
+                    if (IsKeyPressed(KEY_ESCAPE)) {
+                        SetGameState(previousGameState);
+                        if (previousGameState == GAME_STATE_TITLE && !titleMenu.active) {
+                            titleMenu.active = true;
+                        }
+                    }
+
+                    BeginDrawing();
+                    ClearBackground(BEIGE);
+                    draw_help_screen(); // Call the function from title.c
+                    EndDrawing();
+                }
+                break;
         }
     }
-    // If loop exits due to WindowShouldClose() but not MENU_EXIT
     CleanupGame(); 
 }
 
