@@ -46,7 +46,7 @@ void LoadQuestions(Question *questions)
 void DrawQuestionWindow(Question *questions, int random, Sound correctAnswerSound, Sound incorrectAnswerSound, GameResources *resources)
 {
     // Define the dimensions of the window
-    float windowWidth = 600;
+    float windowWidth = 1200;
     float windowHeight = 400;
     float windowX = (GetScreenWidth() - windowWidth) / 2.0f; 
     float windowY = (GetScreenHeight() - windowHeight) / 2.0f;
@@ -134,20 +134,22 @@ void DrawQuestionWindow(Question *questions, int random, Sound correctAnswerSoun
     }
     // --- END OF TEXT DRAWING ---
 
-    GuiSetStyle(DEFAULT, TEXT_SIZE, originalTextSize);
+    GuiSetStyle(DEFAULT, 40, originalTextSize);
 
     // Draw the answers and buttons
     float firstAnswerY = questionTextY + questionHeight + answerSpacing; 
+    float textVerticalOffset = 10.0f; // Increased from 5.0f to 10.0f for lower text placement
 
     for (int i = 0; i < 4; i++)
     {
         float currentAnswerY = firstAnswerY + (answerHeight + answerSpacing) * i;
-        GuiLabel((Rectangle){windowX + padding + buttonWidth + 10, currentAnswerY, 
-                 windowWidth - 2 * padding - buttonWidth - 10, answerHeight}, 
-                 questions[random].answersText[i]);
         
+        // Center the button vertically with respect to the answer text
+        float buttonY = currentAnswerY + (answerHeight - buttonHeight) / 2;
+        
+        // Draw the button first
         char buttonLabel[2] = {'a' + i, '\0'}; 
-        if (GuiButton((Rectangle){windowX + padding, currentAnswerY, buttonWidth, buttonHeight}, buttonLabel))
+        if (GuiButton((Rectangle){windowX + padding, buttonY, buttonWidth, buttonHeight}, buttonLabel))
         {
             char chosenAnswerChar = 'a' + i;
             char correctAnswerChar = questions[random].answers[0];
@@ -212,5 +214,13 @@ void DrawQuestionWindow(Question *questions, int random, Sound correctAnswerSoun
             
             SetGameState(GAME_STATE_GAMEPLAY);
         }
+
+        // Draw the answer text with increased vertical offset
+        GuiLabel((Rectangle){
+            windowX + padding + buttonWidth + 10, 
+            currentAnswerY + textVerticalOffset, // Increased offset will move text lower
+            windowWidth - 2 * padding - buttonWidth - 10, 
+            answerHeight
+        }, questions[random].answersText[i]);
     }
 }
