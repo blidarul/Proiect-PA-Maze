@@ -23,7 +23,7 @@ static Pause_menu pauseMenu;
 
 // Question state variables
 static float questionTimer = 0.0f; // Timer to track elapsed time
-static const float questionInterval = 10.0f; // Time interval (in seconds) for question pop-up
+static const float questionInterval = 45.0f; // Time interval (in seconds) for question pop-up
 static RenderTexture2D lastFrameTexture; // RenderTexture to store the last 3D frame
 bool isQuestionActive = false; // Tracks the number of questions answered
 static int currentQuestionIndex = -1; // Stores the index of the current question
