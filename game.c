@@ -220,8 +220,8 @@ void RunGameLoop(void)
                                (Rectangle){0, 0, (float)lastFrameTexture.texture.width, (float)-lastFrameTexture.texture.height},
                                (Vector2){0, 0}, WHITE);
 
-                // Draw the question window and handle answer logic
-                DrawQuestionWindow(resources.questions, currentQuestionIndex, correctAnswerSound, incorrectAnswerSound); 
+                // Draw the question window with resources parameter
+                DrawQuestionWindow(resources.questions, currentQuestionIndex, correctAnswerSound, incorrectAnswerSound, &resources);
                 EndDrawing();
                 break;
         }

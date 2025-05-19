@@ -252,12 +252,10 @@ void RevealMinimap(Maze *maze, int playerCellX, int playerCellY, Image cubicmap,
         {
             if(GetImageColor(cubicmap, checkX, checkY).r == 0)
             {
+                // Path (black in cubicmap) -> Draw as WHITE on minimap
                 ImageDrawPixel(minimap, checkX, checkY, WHITE);
             }
-            else
-            {
-                ImageDrawPixel(minimap, checkX, checkY, BLACK);
-            }
+            // else: Wall (white in cubicmap) -> Leave as DARKGRAY (no need to draw)
         }
     }  
 }

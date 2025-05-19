@@ -43,7 +43,7 @@ void LoadQuestions(Question *questions)
     }
 }
 
-void DrawQuestionWindow(Question *questions, int random, Sound correctAnswerSound, Sound incorrectAnswerSound)
+void DrawQuestionWindow(Question *questions, int random, Sound correctAnswerSound, Sound incorrectAnswerSound, GameResources *resources)
 {
     // Define the dimensions of the window
     float windowWidth = 600;
@@ -142,25 +142,59 @@ void DrawQuestionWindow(Question *questions, int random, Sound correctAnswerSoun
     for (int i = 0; i < 4; i++)
     {
         float currentAnswerY = firstAnswerY + (answerHeight + answerSpacing) * i;
-        GuiLabel((Rectangle){windowX + padding + buttonWidth + 10, currentAnswerY, windowWidth - 2 * padding - buttonWidth - 10, answerHeight}, questions[random].answersText[i]);
+        GuiLabel((Rectangle){windowX + padding + buttonWidth + 10, currentAnswerY, 
+                 windowWidth - 2 * padding - buttonWidth - 10, answerHeight}, 
+                 questions[random].answersText[i]);
         
-        char buttonLabel[2] = {'A' + i, '\0'}; 
+        char buttonLabel[2] = {'a' + i, '\0'}; 
         if (GuiButton((Rectangle){windowX + padding, currentAnswerY, buttonWidth, buttonHeight}, buttonLabel))
         {
-            char chosenAnswerChar = 'a' + i; // Convert button index (0-3) to char ('a'-'d')
-            char correctAnswerChar = questions[random].answers[0]; // Assuming first char is the correct one
+            char chosenAnswerChar = 'a' + i;
+            char correctAnswerChar = questions[random].answers[0];
 
             if (chosenAnswerChar == correctAnswerChar)
             {
                 PlaySound(correctAnswerSound);
-                // You could add logic here for scoring, etc.
+                
+                // Start revealing from the bottom of the minimap
+                static int lastRevealedRow = 0;
+                if (lastRevealedRow == 0) 
+                {
+                    lastRevealedRow = resources->minimap.height - 1; // Start from bottom
+                }
+                
+                // Reveal 3 new rows going upward
+                int rowsToReveal = 3;
+                
+                // Reveal several new rows (going up from the bottom)
+                for(int y = lastRevealedRow; y > lastRevealedRow - rowsToReveal && y >= 0; y--)
+                {
+                    for(int x = 0; x < resources->minimap.width; x++)
+                    {
+                        // Get the color from the cubicmap (which contains the full maze)
+                        Color pixelColor = GetImageColor(resources->cubicimage, x, y);
+                        
+                        // If the pixel is a path (black in the cubicmap)
+                        if (pixelColor.r == 0)
+                        {
+                            // Reveal this pixel on the minimap
+                            ImageDrawPixel(&resources->minimap, x, y, WHITE);
+                        }
+                    }
+                }
+                
+                // Update the last revealed row (moving upward)
+                lastRevealedRow -= rowsToReveal;
+                
+                // Update the minimap texture
+                UpdateMinimapTexture(resources);
             }
             else
             {
                 PlaySound(incorrectAnswerSound);
             }
             
-            SetGameState(GAME_STATE_GAMEPLAY); // Transition back to gameplay
+            SetGameState(GAME_STATE_GAMEPLAY);
         }
     }
 }
