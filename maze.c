@@ -1,4 +1,5 @@
 #include "maze.h"
+#include "config.h"
 
 Maze* createMaze(int height, int width)
 {
@@ -240,6 +241,10 @@ void RevealMinimap(Maze *maze, int playerCellX, int playerCellY, Image cubicmap,
     int cellX = playerCellX;
     int cellY = playerCellY;
     
+    // Calculate win position in cubic map coordinates using the MAZE_SIZE from config.h
+    int exitX = (MAZE_SIZE - 1) * 2 + 1;
+    int exitY = (MAZE_SIZE - 1) * 2 + 1;
+    
     for(int i = -1; i <= 1; i++)
     for(int j = -1; j <= 1; j++)
     {
@@ -252,8 +257,16 @@ void RevealMinimap(Maze *maze, int playerCellX, int playerCellY, Image cubicmap,
         {
             if(GetImageColor(cubicmap, checkX, checkY).r == 0)
             {
-                // Path (black in cubicmap) -> Draw as WHITE on minimap
-                ImageDrawPixel(minimap, checkX, checkY, WHITE);
+                // Special case for win position
+                if(checkX == exitX && checkY == exitY)
+                {
+                    ImageDrawPixel(minimap, checkX, checkY, GREEN);
+                }
+                else
+                {
+                    // Path (black in cubicmap) -> Draw as WHITE on minimap
+                    ImageDrawPixel(minimap, checkX, checkY, WHITE);
+                }
             }
             // else: Wall (white in cubicmap) -> Leave as DARKGRAY (no need to draw)
         }

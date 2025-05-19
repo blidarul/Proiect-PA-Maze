@@ -166,6 +166,13 @@ void DrawQuestionWindow(Question *questions, int random, Sound correctAnswerSoun
                 // Reveal 3 new rows going upward
                 int rowsToReveal = 3;
                 
+                // Calculate win position (bottom-right corner of the maze)
+                // The maze dimensions are typically based on the cubicimage dimensions
+                int mazeWidth = resources->cubicimage.width;
+                int mazeHeight = resources->cubicimage.height;
+                int exitX = mazeWidth - 1;  // Right-most cell
+                int exitY = mazeHeight - 1; // Bottom-most cell
+                
                 // Reveal several new rows (going up from the bottom)
                 for(int y = lastRevealedRow; y > lastRevealedRow - rowsToReveal && y >= 0; y--)
                 {
@@ -177,8 +184,17 @@ void DrawQuestionWindow(Question *questions, int random, Sound correctAnswerSoun
                         // If the pixel is a path (black in the cubicmap)
                         if (pixelColor.r == 0)
                         {
-                            // Reveal this pixel on the minimap
-                            ImageDrawPixel(&resources->minimap, x, y, WHITE);
+                            // Check if this is the win position
+                            if (x == exitX && y == exitY)
+                            {
+                                // Mark the win position as GREEN
+                                ImageDrawPixel(&resources->minimap, x, y, GREEN);
+                            }
+                            else
+                            {
+                                // Reveal this pixel on the minimap as WHITE
+                                ImageDrawPixel(&resources->minimap, x, y, WHITE);
+                            }
                         }
                     }
                 }

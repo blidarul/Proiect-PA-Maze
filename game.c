@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "sound.h"
 #include "questions.h"
+#include "config.h"
 
 // Private function prototypes
 static Maze* InitializeMazeData(int height, int width);
@@ -155,29 +156,37 @@ void RunGameLoop(void)
 
                     VisitCell(maze, playerPixelX, playerPixelY, &resources);
 
+                    // --- Check for WIN CONDITION ---
+                    if (playerPixelX == (mazeWidth*2-1) && playerPixelY == (mazeHeight*2-1))
+                    {
+                        SetGameState(GAME_STATE_WIN);
+                    }
+                    // --- End of WIN CONDITION check ---
+
+
                     // Update the question timer
                     questionTimer += GetFrameTime();
-                    if (questionTimer >= questionInterval)
+                    if (questionTimer >= questionInterval && GetGameState() == GAME_STATE_GAMEPLAY) // Check if still in gameplay
                     {
-                        PlaySound(questionPopupSound); // Play the sound
-                        // Capture the last frame
+                        PlaySound(questionPopupSound); 
                         BeginTextureMode(lastFrameTexture);
                         ClearBackground(DARKBLUE);
                         RenderFrame(camera, resources, maze->root, playerPixelX, playerPixelY, false);
                         EndTextureMode();
 
-                        // Randomize the question index
-                        currentQuestionIndex = rand() % 60; // Randomize question index
-
-                        // Transition to the question gamestate
-                        questionTimer = 0.0f; // Reset the timer
+                        currentQuestionIndex = rand() % 60; 
+                        questionTimer = 0.0f; 
                         SetGameState(GAME_STATE_QUESTION);
                     }
-
-                    BeginDrawing();
-                    ClearBackground(DARKBLUE);
-                    RenderFrame(camera, resources, maze->root, playerPixelX, playerPixelY, false);
-                    EndDrawing();
+                    
+                    // Only draw gameplay if not transitioning to another state this frame
+                    if (GetGameState() == GAME_STATE_GAMEPLAY) 
+                    {
+                        BeginDrawing();
+                        ClearBackground(DARKBLUE);
+                        RenderFrame(camera, resources, maze->root, playerPixelX, playerPixelY, false);
+                        EndDrawing();
+                    }
                 }
                 break;
 
@@ -223,6 +232,34 @@ void RunGameLoop(void)
                 // Draw the question window with resources parameter
                 DrawQuestionWindow(resources.questions, currentQuestionIndex, correctAnswerSound, incorrectAnswerSound, &resources);
                 EndDrawing();
+                break;
+
+            case GAME_STATE_WIN:
+                {
+                    if (IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                    {
+                        // Reset game or relevant parts before going to title
+                        // For example, re-initialize maze and player position if needed for a new game
+                        // This might involve calling parts of InitGame() or a dedicated ResetGame() function.
+                        // For now, just go back to title.
+                        SetGameState(GAME_STATE_TITLE);
+                        // Ensure title menu is active
+                        if (!titleMenu.active) titleMenu.active = true; 
+                    }
+
+                    BeginDrawing();
+                    ClearBackground(BEIGE); // Or any color you like for the win screen
+
+                    const char* winText = "YOU WIN!";
+                    int winTextWidth = MeasureText(winText, 60);
+                    DrawText(winText, GetScreenWidth()/2 - winTextWidth/2, GetScreenHeight()/2 - 60, 60, GOLD);
+
+                    const char* instructionText = "Press ENTER or Click to return to Title Screen";
+                    int instructionTextWidth = MeasureText(instructionText, 20);
+                    DrawText(instructionText, GetScreenWidth()/2 - instructionTextWidth/2, GetScreenHeight()/2 + 20, 20, DARKGRAY);
+                    
+                    EndDrawing();
+                }
                 break;
         }
     }

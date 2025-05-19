@@ -5,9 +5,7 @@
 #include "raylib.h"
 
 // Define min/max for the player height slider
-#define MIN_PLAYER_HEIGHT_SETTING 1.0f
-#define MAX_PLAYER_HEIGHT_SETTING 2.5f
-#define DEFAULT_PLAYER_HEIGHT_SETTING 1.8f
+
 
 typedef struct 
 {

@@ -23,12 +23,20 @@ GameResources LoadGameResources(Maze *maze, int mazeGridHeight, int mazeGridWidt
         ImageDrawPixel(&resources.minimap, x, 0, BLACK);                      // Top border
         ImageDrawPixel(&resources.minimap, x, minimapImageHeight - 1, BLACK); // Bottom border
     }
+    
     // Left and right borders (excluding corners already drawn)
     for (int y = 1; y < minimapImageHeight - 1; y++)
     {
         ImageDrawPixel(&resources.minimap, 0, y, BLACK);                      // Left border
-        ImageDrawPixel(&resources.minimap, minimapImageWidth - 1, y, BLACK); // Right border
+        ImageDrawPixel(&resources.minimap, minimapImageWidth - 1, y, BLACK);  // Right border
     }
+
+    // Mark the win position (bottom-right cell) with green
+    // The exit is at mazeGridWidth-1, mazeGridHeight-1 in grid coordinates
+    // Convert to cubic map coordinates (multiply by 2 and add 1)
+    int exitX = (mazeGridWidth - 1) * 2 + 1;
+    int exitY = (mazeGridHeight - 1) * 2 + 1;
+    ImageDrawPixel(&resources.minimap, exitX, exitY, GREEN);
 
     // Generate cubicimage from maze data
     resources.cubicimage = ConvertMazeToCubicMap(maze, mazeGridHeight, mazeGridWidth);

@@ -1,6 +1,7 @@
 #include "settings.h"
 #include "raygui.h"
-#include "sound.h" // For SetMasterVolume, if not already included via other headers
+#include "sound.h"
+#include "config.h"
 
 static float clamp(float value, float min, float max) 
 {

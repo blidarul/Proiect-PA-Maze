@@ -20,6 +20,7 @@ void SetGameState(GameState state)
     case GAME_STATE_PAUSE:
     case GAME_STATE_QUESTION:
     case GAME_STATE_SETTINGS:
+    case GAME_STATE_WIN:
         EnableCursor();
         break;
     default:
