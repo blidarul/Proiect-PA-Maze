@@ -2,6 +2,7 @@
 #define CAMERA_H
 
 #include "raylib.h"
+#include "maze.h"
 #include "gameResources.h"
 #include "config.h"
 
@@ -12,5 +13,8 @@ Camera InitializeCamera(void);
 void UpdatePlayerMovement(Camera* camera, GameResources resources);
 
 void DrawStaminaBar();
+
+Camera InitializeCamera(void); // Ensure app_settings is initialized before this is called if it relies on it
+void UpdatePlayerMovement(Camera *camera, GameResources resources);
 
 #endif // CAMERA_H

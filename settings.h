@@ -4,26 +4,29 @@
 #include <stdbool.h>
 #include "raylib.h"
 
+// Define min/max for the player height slider
+#define MIN_PLAYER_HEIGHT_SETTING 1.0f
+#define MAX_PLAYER_HEIGHT_SETTING 2.5f
+#define DEFAULT_PLAYER_HEIGHT_SETTING 1.8f
+
 typedef struct 
 {
     float volume;          
     float sensitivity;     
-    int character_size;         
+    float player_height; // New field for player height
 
     Rectangle volume_slider;      
     Rectangle sensitivity_slider;
-    Rectangle charsize_slider;
-    Rectangle back_button; // It's good practice to store button rects here too
+    Rectangle player_height_slider; // New field
+    Rectangle back_button;
 
     bool volume_dragging;
     bool sensitivity_dragging;
-    bool charsize_dragging;
+    bool player_height_dragging; // New field
 } Settings;
 
 void initialize_settings(Settings *settings, int screen_width, int screen_height);
-
 bool update_settings(Settings *settings);
-
 void draw_settings(const Settings *settings);
 
 #endif
