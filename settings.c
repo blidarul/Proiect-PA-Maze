@@ -1,25 +1,6 @@
 #include "settings.h"
-#include "raygui.h" // Make sure raygui.h is included if you use GuiButton
-
-void initialize_settings(Settings *settings, int screen_width, int screen_height)
-{
-    settings->volume = 0.5f;
-    settings->sensitivity = 50.0f;
-    settings->character_size = 20;
-
-    int slider_width = 300;
-    int slider_height = 20;
-    int start_x = screen_width / 2 - slider_width / 2;
-    int start_y = screen_height / 2 - 80;
-
-    settings->volume_slider = (Rectangle){ start_x, start_y, slider_width, slider_height };
-    settings->sensitivity_slider = (Rectangle){ start_x, start_y + 60, slider_width, slider_height };
-    settings->charsize_slider = (Rectangle){ start_x, start_y + 120, slider_width, slider_height };
-
-    settings->volume_dragging = false;
-    settings->sensitivity_dragging = false;
-    settings->charsize_dragging = false;
-}
+#include "raygui.h"
+#include "sound.h" // For SetMasterVolume, if not already included via other headers
 
 static float clamp(float value, float min, float max) 
 {
@@ -28,13 +9,36 @@ static float clamp(float value, float min, float max)
     return value;
 }
 
+void initialize_settings(Settings *settings, int screen_width, int screen_height)
+{
+    settings->volume = 0.5f;
+    settings->sensitivity = 50.0f;
+    settings->player_height = DEFAULT_PLAYER_HEIGHT_SETTING;
+
+    settings->volume_dragging = false;
+    settings->sensitivity_dragging = false;
+    settings->player_height_dragging = false;
+
+    int slider_width = 200;
+    int slider_height = 20;
+    int start_x = screen_width / 2 - slider_width / 2;
+    int start_y = 100;
+    int y_spacing = 80;
+
+    settings->volume_slider = (Rectangle){start_x, start_y, slider_width, slider_height};
+    settings->sensitivity_slider = (Rectangle){start_x, start_y + y_spacing, slider_width, slider_height};
+    settings->player_height_slider = (Rectangle){start_x, start_y + 2 * y_spacing, slider_width, slider_height};
+
+    settings->back_button = (Rectangle){ start_x, start_y + 3 * y_spacing + 20, slider_width, 40 };
+}
+
 bool update_settings(Settings *settings)
 {
     Vector2 mouse_pos = GetMousePosition();
 
-    float get_slider_value(Rectangle slider) 
+    float get_slider_value_normalized(Rectangle slider_rect) 
     {
-        float val = (mouse_pos.x - slider.x) / slider.width;
+        float val = (mouse_pos.x - slider_rect.x) / slider_rect.width;
         return clamp(val, 0.0f, 1.0f);
     }
 
@@ -42,37 +46,35 @@ bool update_settings(Settings *settings)
     {
         if (CheckCollisionPointRec(mouse_pos, settings->volume_slider)) settings->volume_dragging = true;
         else if (CheckCollisionPointRec(mouse_pos, settings->sensitivity_slider)) settings->sensitivity_dragging = true;
-        else if (CheckCollisionPointRec(mouse_pos, settings->charsize_slider)) settings->charsize_dragging = true;
+        else if (CheckCollisionPointRec(mouse_pos, settings->player_height_slider)) settings->player_height_dragging = true;
     }
 
     if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) 
     {
         settings->volume_dragging = false;
         settings->sensitivity_dragging = false;
-        settings->charsize_dragging = false;
+        settings->player_height_dragging = false;
     }
 
     if (settings->volume_dragging) 
     {
-        float val = get_slider_value(settings->volume_slider);
+        float val = get_slider_value_normalized(settings->volume_slider);
         settings->volume = val;  
         SetMasterVolume(settings->volume); 
     }
     if (settings->sensitivity_dragging) 
     {
-        float val = get_slider_value(settings->sensitivity_slider);
+        float val = get_slider_value_normalized(settings->sensitivity_slider);
         settings->sensitivity = 10.0f + val * (100.0f - 10.0f);
     }
-    if (settings->charsize_dragging) 
+    if (settings->player_height_dragging) 
     {
-        float val = get_slider_value(settings->charsize_slider);
-        settings->character_size = (int)(10 + val * (40 - 10));
+        float val_norm = get_slider_value_normalized(settings->player_height_slider);
+        settings->player_height = MIN_PLAYER_HEIGHT_SETTING + val_norm * (MAX_PLAYER_HEIGHT_SETTING - MIN_PLAYER_HEIGHT_SETTING);
     }
 
-    Rectangle backButtonRect = { settings->volume_slider.x, settings->volume_slider.y + 150, settings->volume_slider.width, 40 };
     bool backButtonPressed = false;
-
-    if (GuiButton(backButtonRect, "Back")) 
+    if (GuiButton(settings->back_button, "Back")) 
     {
         backButtonPressed = true;
     }
@@ -85,32 +87,29 @@ void draw_settings(const Settings *settings)
     const int fontSize = 20;
     int screen_width = GetScreenWidth();
 
-    DrawText("Settings", screen_width / 2 - MeasureText("Settings", fontSize) / 2, 50, fontSize + 10, DARKBLUE);
+    DrawText("Settings", screen_width / 2 - MeasureText("Settings", fontSize + 10) / 2, 30, fontSize + 10, DARKBLUE);
 
     DrawText("Volume", settings->volume_slider.x, settings->volume_slider.y - 25, fontSize, BLACK);
-    DrawText("Sensitivity", settings->sensitivity_slider.x, settings->sensitivity_slider.y - 25, fontSize, BLACK);
-    DrawText("Character Size", settings->charsize_slider.x, settings->charsize_slider.y - 25, fontSize, BLACK);
-
     DrawRectangleRec(settings->volume_slider, LIGHTGRAY);
+    DrawCircle(settings->volume_slider.x + (int)(settings->volume * settings->volume_slider.width), 
+               settings->volume_slider.y + settings->volume_slider.height / 2, 10, DARKBLUE);
+    DrawText(TextFormat("%.0f%%", settings->volume * 100), settings->volume_slider.x + settings->volume_slider.width + 20, settings->volume_slider.y, fontSize, BLACK);
+
+    DrawText("Sensitivity", settings->sensitivity_slider.x, settings->sensitivity_slider.y - 25, fontSize, BLACK);
     DrawRectangleRec(settings->sensitivity_slider, LIGHTGRAY);
-    DrawRectangleRec(settings->charsize_slider, LIGHTGRAY);
-
-    int handle_radius = 10;
-
-    int vol_pos = settings->volume_slider.x + (int)(settings->volume * settings->volume_slider.width);
-    DrawCircle(vol_pos, settings->volume_slider.y + settings->volume_slider.height / 2, handle_radius, DARKBLUE);
-
-    int sens_pos = settings->sensitivity_slider.x + (int)(((settings->sensitivity - 10) / 90.0f) * settings->sensitivity_slider.width);
-    DrawCircle(sens_pos, settings->sensitivity_slider.y + settings->sensitivity_slider.height / 2, handle_radius, DARKBLUE);
-
-    int char_pos = settings->charsize_slider.x + (int)(((settings->character_size - 10) / 30.0f) * settings->charsize_slider.width);
-    DrawCircle(char_pos, settings->charsize_slider.y + settings->charsize_slider.height / 2, handle_radius, DARKBLUE);
-
-    DrawText(TextFormat("%.2f", settings->volume), settings->volume_slider.x + settings->volume_slider.width + 20, settings->volume_slider.y, fontSize, BLACK);
+    float sensitivity_norm = (settings->sensitivity - 10.0f) / (100.0f - 10.0f);
+    DrawCircle(settings->sensitivity_slider.x + (int)(sensitivity_norm * settings->sensitivity_slider.width), 
+               settings->sensitivity_slider.y + settings->sensitivity_slider.height / 2, 10, DARKBLUE);
     DrawText(TextFormat("%.0f", settings->sensitivity), settings->sensitivity_slider.x + settings->sensitivity_slider.width + 20, settings->sensitivity_slider.y, fontSize, BLACK);
-    DrawText(TextFormat("%d", settings->character_size), settings->charsize_slider.x + settings->charsize_slider.width + 20, settings->charsize_slider.y, fontSize, BLACK);
+    
+    DrawText("Player Height", settings->player_height_slider.x, settings->player_height_slider.y - 25, fontSize, BLACK);
+    DrawRectangleRec(settings->player_height_slider, LIGHTGRAY);
+    float player_height_norm = (settings->player_height - MIN_PLAYER_HEIGHT_SETTING) / (MAX_PLAYER_HEIGHT_SETTING - MIN_PLAYER_HEIGHT_SETTING);
+    DrawCircle(settings->player_height_slider.x + (int)(player_height_norm * settings->player_height_slider.width), 
+               settings->player_height_slider.y + settings->player_height_slider.height / 2, 10, DARKBLUE);
+    DrawText(TextFormat("%.2f m", settings->player_height), settings->player_height_slider.x + settings->player_height_slider.width + 20, settings->player_height_slider.y, fontSize, BLACK);
 
-    Rectangle backButtonRect = { settings->volume_slider.x, settings->volume_slider.y + 150, settings->volume_slider.width, 40 };
-    DrawRectangleRec(backButtonRect, LIGHTGRAY);
-    DrawText("Back", backButtonRect.x + backButtonRect.width / 2 - MeasureText("Back", fontSize) / 2, backButtonRect.y + backButtonRect.height / 2 - fontSize / 2, fontSize, BLACK);
+    DrawRectangleRec(settings->back_button, LIGHTGRAY);
+    DrawText("Back", settings->back_button.x + settings->back_button.width / 2 - MeasureText("Back", fontSize) / 2, 
+             settings->back_button.y + settings->back_button.height / 2 - fontSize / 2, fontSize, BLACK);
 }
