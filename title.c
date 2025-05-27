@@ -88,6 +88,27 @@ Menu_Result update_menu(Menu *menu)
 
 void draw_menu(const Menu *menu)
 {
+    // --- Project Title Text ---
+    const char *project_title = "Fostering the Transversal Digital Competences in Higher Education";
+    const char *acronym = "(Acronym: FTDCHE)";
+    int projectTitleFontSize = 25; // Smaller than header but still readable
+    Color projectTitleColor = MAROON; // Different color to distinguish it
+
+    int project_title_w = MeasureText(project_title, projectTitleFontSize);
+    int acronym_w = MeasureText(acronym, projectTitleFontSize);
+    
+    DrawText(project_title,
+             GetScreenWidth()/2 - project_title_w/2,
+             30, // Position above the MAIN MENU
+             projectTitleFontSize,
+             projectTitleColor);
+             
+    DrawText(acronym,
+             GetScreenWidth()/2 - acronym_w/2,
+             60, // Position below the project title
+             projectTitleFontSize,
+             projectTitleColor);
+
     // --- Enhanced Title Text ---
     const char *header = "MAIN MENU";
     int headerFontSize = 40; // Increased font size
@@ -100,7 +121,7 @@ void draw_menu(const Menu *menu)
     int header_w = MeasureText(header, headerFontSize);
     DrawText(header,
              GetScreenWidth()/2 - header_w/2,
-             80, // Adjusted Y position
+             120, // Adjusted Y position
              headerFontSize,
              headerColor);
 
@@ -156,15 +177,62 @@ void draw_menu(const Menu *menu)
     //draw credentials
     int screen_width = GetScreenWidth();
     int screen_height = GetScreenHeight();
-    int current_y_offset = screen_height - 100; // Start drawing from the bottom up
+    int current_y_offset = screen_height - 180;
 
+    // Add project reference with different fonts for text and code
+    const char *project_ref_text = "Ref. Project: ";
+    const char *project_ref_code = "2022-1-ES01-KA220-HED-000089861";
+    
+    // Draw the reference text and code separately
+    int ref_text_w = MeasureText(project_ref_text, 20);
+    int ref_code_w = MeasureTextEx(GetFontDefault(), project_ref_code, 20, 1).x; // Using default font (monospace)
+    int total_width = ref_text_w + ref_code_w;
+    
+    // Draw reference text (regular font)
+    DrawText(project_ref_text,
+             screen_width / 2 - total_width / 2,
+             current_y_offset,
+             18,
+             BLACK);
+             
+    // Draw reference code (monospace font)
+    DrawTextEx(GetFontDefault(), 
+               project_ref_code,
+               (Vector2){ screen_width / 2 - total_width / 2 + ref_text_w, current_y_offset },
+               18,
+               1,
+               BLACK);
+    
+    current_y_offset += 35;
+
+    // Split leader and partners into separate lines
+    const char *project_leader = "Leader: University of Malaga";
+    const char *project_partners = "Partners: UNSTPB, University of Primorska (Slovenia), University of Applied Sciences (UCLL - Belgium)";
+    
+    int project_leader_w = MeasureText(project_leader, 18);
+    DrawText(project_leader,
+             screen_width / 2 - project_leader_w / 2,
+             current_y_offset,
+             18,
+             BLACK);
+    current_y_offset += 25; // Add spacing between leader and partners lines
+
+    int project_partners_w = MeasureText(project_partners, 18);
+    DrawText(project_partners,
+             screen_width / 2 - project_partners_w / 2,
+             current_y_offset,
+             18,
+             BLACK);
+    current_y_offset += 35;
+
+    // Existing credentials
     int faculty_w = MeasureText(faculty, 20);
     DrawText(faculty,
              screen_width / 2 - faculty_w / 2,
              current_y_offset,
              20,
              BLACK);
-    current_y_offset += 25; // Move up for the next line
+    current_y_offset += 25;
 
     int proffesor_w = MeasureText(proffesor, 20);
     DrawText(proffesor,
